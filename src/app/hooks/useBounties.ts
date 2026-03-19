@@ -12,7 +12,7 @@ const INITIAL_BOUNTIES: Bounty[] = [
     requirements: 'Must mention free ETH from faucets, security, and smart contract testing. Tone should be technical.',
     reward: 0.001,
     status: 'OPEN',
-    createdAt: new Date().toISOString(),
+    createdAt: '2024-03-20T10:00:00.000Z',
     creatorAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
   },
   {
@@ -22,7 +22,7 @@ const INITIAL_BOUNTIES: Bounty[] = [
     requirements: 'Must include a CTA, background grid, and be responsive.',
     reward: 0.0025,
     status: 'IN_REVIEW',
-    createdAt: new Date().toISOString(),
+    createdAt: '2024-03-19T15:30:00.000Z',
     creatorAddress: '0x2546Bc497E258ce2D5166661492293C459641120'
   },
   {
@@ -32,7 +32,7 @@ const INITIAL_BOUNTIES: Bounty[] = [
     requirements: 'Provide a short report of findings and fixed code.',
     reward: 0.005,
     status: 'PAID',
-    createdAt: new Date().toISOString(),
+    createdAt: '2024-03-18T09:15:00.000Z',
     creatorAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC'
   },
 ];

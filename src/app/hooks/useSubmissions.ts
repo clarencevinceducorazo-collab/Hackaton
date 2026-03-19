@@ -9,11 +9,11 @@ const INITIAL_SUBMISSIONS: Submission[] = [
   {
     id: "sub-1",
     bountyId: "2",
-    submitterAddress: "0xA1B2C3D4E5F6a1b2c3d4e5f6a1b2c3d4e5f6a1b2",
+    submitterAddress: "0xA1B2C3D4E5F6a1b2c3d4e5f6a1b2c3d4e5f6a1b",
     githubRepo: "https://github.com/alice-dev/hero-component",
     description:
       "Built a fully responsive hero section with animated gradient background, CTA button with hover effects, and a background grid pattern using CSS variables.",
-    submittedAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+    submittedAt: "2024-03-20T08:00:00.000Z",
     status: "pending",
   },
   {
@@ -23,7 +23,7 @@ const INITIAL_SUBMISSIONS: Submission[] = [
     githubRepo: "https://github.com/bob-ui/futuristic-hero",
     description:
       "Created a dark-themed hero component with a glassmorphism card, moving particle background, and fully responsive layout with Tailwind CSS.",
-    submittedAt: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+    submittedAt: "2024-03-20T05:00:00.000Z",
     status: "pending",
   },
   {
@@ -33,7 +33,7 @@ const INITIAL_SUBMISSIONS: Submission[] = [
     githubRepo: "https://github.com/carol-codes/tailwind-hero",
     description:
       "Minimal hero section with spotlight effect behind the h1, animated CTA button, and a 12-column grid background. Passes Lighthouse a11y checks.",
-    submittedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+    submittedAt: "2024-03-19T22:00:00.000Z",
     status: "pending",
   },
 ];
