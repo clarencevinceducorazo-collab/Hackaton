@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
+import { User } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface Bounty {
@@ -10,9 +11,10 @@ interface Bounty {
   reward: number;
   status: 'OPEN' | 'IN_REVIEW' | 'PAID';
   tags?: string[];
-  postedBy?: string;
+  postedBy?: string; // This was from an older spec, we use creatorAddress now
+  creatorAddress?: string;
   deadline?: string;
-  requirements?: string[];
+  requirements?: string | string[];
 }
 
 interface BountyDetailModalProps {
@@ -52,6 +54,8 @@ export function BountyDetailModal({ bounty, isOpen, onClose, onSubmitWork }: Bou
 
   const repoError = repoTouched && githubRepo !== '' && !isValidGitHubUrl(githubRepo);
   const canSubmit  = githubRepo.trim() !== '' && isValidGitHubUrl(githubRepo);
+
+  const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   // ── Reset state on close ────────────────────────────────────────────────────
   const handleClose = () => {
@@ -108,7 +112,11 @@ export function BountyDetailModal({ bounty, isOpen, onClose, onSubmitWork }: Bou
   const status = STATUS_CONFIG[bounty.status];
 
   // Safe arrays — guard against undefined / non-array data shapes
-  const requirements = Array.isArray(bounty.requirements) ? bounty.requirements : [];
+  const requirements = Array.isArray(bounty.requirements) 
+    ? bounty.requirements 
+    : typeof bounty.requirements === 'string' 
+      ? [bounty.requirements] 
+      : [];
   const tags         = Array.isArray(bounty.tags)         ? bounty.tags         : [];
 
   return (
@@ -194,8 +202,8 @@ export function BountyDetailModal({ bounty, isOpen, onClose, onSubmitWork }: Bou
                 style={{ background: 'rgba(0,212,255,0.08)', border: '1px solid rgba(0,212,255,0.2)' }}
               >
                 <div className="text-[9px] text-[#6b7a99] font-bold uppercase tracking-widest">Reward</div>
-                <div className="text-lg font-black text-[#00d4ff] font-mono leading-tight">${bounty.reward}</div>
-                <div className="text-[9px] text-[#6b7a99]">USDC</div>
+                <div className="text-lg font-black text-[#00d4ff] font-mono leading-tight">{bounty.reward}</div>
+                <div className="text-[9px] text-[#6b7a99]">ETH</div>
               </div>
             </div>
           </div>
@@ -260,19 +268,19 @@ export function BountyDetailModal({ bounty, isOpen, onClose, onSubmitWork }: Bou
                 )}
 
                 {/* Meta row */}
-                <div className="grid grid-cols-2 gap-4">
-                  {bounty.postedBy && (
-                    <MetaBox
-                      label="Posted By"
-                      value={
-                        <span className="font-mono text-xs text-[#c7d2fe]">
-                          {bounty.postedBy.length > 16
-                            ? `${bounty.postedBy.slice(0, 6)}…${bounty.postedBy.slice(-4)}`
-                            : bounty.postedBy}
-                        </span>
-                      }
-                    />
-                  )}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 rounded-xl flex items-center gap-4" style={{ background: 'rgba(13,20,36,0.6)', border: '1px solid rgba(59,130,246,0.12)' }}>
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#a855f7] to-[#00d4ff] flex items-center justify-center text-sm font-black text-white shrink-0 shadow-[0_0_10px_rgba(0,212,255,0.3)]">
+                      {bounty.creatorAddress ? bounty.creatorAddress.slice(2, 3).toUpperCase() : <User size={16} />}
+                    </div>
+                    <div>
+                      <div className="text-[9px] text-[#6b7a99] font-bold uppercase tracking-widest mb-0.5">Posted By</div>
+                      <div className="text-xs font-mono font-bold text-[#eef2ff]">
+                        {bounty.creatorAddress ? truncateAddress(bounty.creatorAddress) : 'Anonymous'}
+                      </div>
+                    </div>
+                  </div>
+
                   {bounty.deadline && (
                     <MetaBox
                       label="Deadline"
