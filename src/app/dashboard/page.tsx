@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useBounties } from '../hooks/useBounties';
 import { BountyCard } from '../components/BountyCard';
 import { BountyModal } from '../components/BountyModal';
@@ -13,9 +14,11 @@ import { PayoutButton } from '../components/PayoutButton';
 import { TransactionHistory } from '../components/TransactionHistory';
 import { TxEntry } from '../types/transaction';
 import { useAccount } from 'wagmi';
+import { User } from 'lucide-react';
 
 export default function DashboardPage() {
   const { address } = useAccount();
+  const router = useRouter();
   const { bounties, addBounty, updateBountyStatus, isLoaded } = useBounties();
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -120,6 +123,18 @@ export default function DashboardPage() {
             className="bg-[#00d4ff] text-[#050810] px-5 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all active:scale-95"
           >
             Post Bounty
+          </button>
+          <button
+            onClick={() => router.push('/profile')}
+            className="w-9 h-9 rounded-full bg-[#0d1424] border-2 border-transparent flex items-center justify-center hover:border-[#a855f7] transition-all active:scale-95"
+            style={{ background: 'linear-gradient(#0d1424, #0d1424) padding-box, linear-gradient(135deg, #a855f7, #00d4ff) border-box', borderWidth: '2px', borderStyle: 'solid', borderColor: 'transparent' }}
+            title="Profile"
+          >
+            {address ? (
+              <span className="text-xs font-black text-[#eef2ff]">{address.slice(2, 3).toUpperCase()}</span>
+            ) : (
+              <User className="w-4 h-4 text-[#6b7a99]" />
+            )}
           </button>
         </div>
       </nav>
