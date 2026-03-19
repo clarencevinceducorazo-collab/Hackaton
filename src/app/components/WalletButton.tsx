@@ -1,22 +1,28 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
 
 /**
  * @fileOverview Smart wallet button managing connection states and balance display.
- * Wallet = a browser extension (MetaMask/Coinbase) that holds crypto.
+ * Includes a 'mounted' check to prevent Next.js hydration errors.
  */
 
 export function WalletButton() {
-  const { address, isConnected, isConnecting } = useAccount();
-  const { connect, connectors } = useConnect();
-  const { disconnect } = useDisconnect();
+  const [mounted, setMounted] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // useBalance = wagmi hook that reads wallet ETH balance
+  // Prevent hydration mismatch by waiting for mount
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const { address, isConnected, isConnecting } = useAccount();
+  const { connect, connectors } = useConnect();
+  const { disconnect } = useDisconnect();
+
   const { data: balance } = useBalance({
     address,
     chainId: baseSepolia.id,
@@ -24,7 +30,16 @@ export function WalletButton() {
 
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-  // STATE C: Connecting
+  // Return a placeholder or skeleton during SSR to avoid mismatch
+  if (!mounted) {
+    return (
+      <button className="px-6 py-2 border border-[#00d4ff] text-[#00d4ff] text-xs font-bold opacity-50 cursor-not-allowed">
+        Connect Wallet
+      </button>
+    );
+  }
+
+  // STATE: Connecting
   if (isConnecting) {
     return (
       <button disabled className="flex items-center gap-2 px-5 py-2 border border-[#00d4ff]/30 text-[#00d4ff] rounded-lg text-xs font-bold opacity-70">
@@ -34,7 +49,7 @@ export function WalletButton() {
     );
   }
 
-  // STATE B: Connected
+  // STATE: Connected
   if (isConnected && address) {
     return (
       <div className="relative">
@@ -44,7 +59,7 @@ export function WalletButton() {
         >
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-            <span className="font-mono text-xs font-bold">{truncateAddress(address)}</span>
+            <span className="font-mono text-xs font-bold text-[#eef2ff]">{truncateAddress(address)}</span>
           </div>
           <span className="text-[10px] text-[#6b7a99] font-mono">
             {balance ? parseFloat(balance.formatted).toFixed(4) : '0.0000'} {balance?.symbol} (testnet)
@@ -52,7 +67,7 @@ export function WalletButton() {
         </button>
 
         {showDropdown && (
-          <div className="absolute right-0 mt-2 w-40 bg-[#0d1424] border border-[rgba(59,130,246,0.2)] rounded-xl shadow-2xl z-[200] overflow-hidden">
+          <div className="absolute right-0 mt-2 w-40 bg-[#0d1424] border border-[rgba(59,130,246,0.2)] rounded-xl shadow-2xl z-[200] overflow-hidden animate-fade-in">
             <button
               onClick={() => {
                 disconnect();
@@ -68,7 +83,7 @@ export function WalletButton() {
     );
   }
 
-  // STATE A: Disconnected
+  // STATE: Disconnected
   return (
     <>
       <button
@@ -99,23 +114,25 @@ export function WalletButton() {
                   className="w-full flex items-center justify-between p-4 bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl hover:border-[#00d4ff] hover:bg-[#00d4ff]/5 transition-all group"
                 >
                   <span className="font-bold text-sm text-[#eef2ff] group-hover:text-[#00d4ff]">
-                    {connector.name === 'Injected' ? 'MetaMask / Browser' : connector.name}
+                    {connector.name}
                   </span>
-                  <span className="text-lg">{connector.name === 'Coinbase Wallet' ? '🔵' : '🦊'}</span>
+                  <span className="text-lg">
+                    {connector.name.toLowerCase().includes('coinbase') ? '🔵' : '🦊'}
+                  </span>
                 </button>
               ))}
             </div>
 
             <p className="mt-6 text-[11px] text-center text-[#6b7a99]">
               No wallet found? Install{' '}
-              <a href="https://metamask.io" target="_blank" rel="noopener" className="text-[#00d4ff] hover:underline">
+              <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" className="text-[#00d4ff] hover:underline">
                 MetaMask
               </a>
             </p>
 
             <button 
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-[#6b7a99] hover:text-[#eef2ff]"
+              className="absolute top-4 right-4 text-[#6b7a99] hover:text-[#eef2ff] p-2"
             >
               ✕
             </button>

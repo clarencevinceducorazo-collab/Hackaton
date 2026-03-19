@@ -1,18 +1,21 @@
-import { http, createConfig } from 'wagmi';
+import { http, createConfig, createStorage, cookieStorage } from 'wagmi';
 import { baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 /**
  * @fileOverview Wagmi configuration for Base Sepolia.
- * Base Sepolia = free testnet version of Base blockchain, fake ETH, free.
+ * SSR: true ensures compatibility with Next.js App Router.
+ * Storage: uses cookieStorage to persist connection state across page reloads.
  */
 
 export const config = createConfig({
   chains: [baseSepolia],
+  ssr: true,
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
   connectors: [
-    // Injected connector covers MetaMask, Rabby, and other browser extensions
     injected(),
-    // Native Coinbase Wallet support
     coinbaseWallet({ appName: 'AI Bounty Board' }),
   ],
   transports: {
