@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Bounty } from '../types/bounty';
 import { User, Pencil, Trash2 } from 'lucide-react';
 import { useAccount } from 'wagmi';
@@ -12,8 +12,14 @@ interface BountyCardProps {
 }
 
 export function BountyCard({ bounty, onSubmit, onEdit, onDelete }: BountyCardProps) {
+  const [mounted, setMounted] = useState(false);
   const { address } = useAccount();
-  const isOwner = address && bounty.creatorAddress && address.toLowerCase() === bounty.creatorAddress.toLowerCase();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const isOwner = mounted && address && bounty.creatorAddress && address.toLowerCase() === bounty.creatorAddress.toLowerCase();
 
   const statusStyles = {
     OPEN: 'bg-[rgba(16,185,129,0.1)] border-[#10b981] text-[#10b981]',
@@ -21,10 +27,10 @@ export function BountyCard({ bounty, onSubmit, onEdit, onDelete }: BountyCardPro
     PAID: 'bg-[rgba(59,130,246,0.1)] border-[#3b82f6] text-[#3b82f6]',
   };
 
-  const date = new Date(bounty.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-  });
+  // Prevent hydration mismatch by only formatting date on client
+  const dateLabel = mounted 
+    ? new Date(bounty.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : '';
 
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
@@ -61,7 +67,7 @@ export function BountyCard({ bounty, onSubmit, onEdit, onDelete }: BountyCardPro
               </button>
             </div>
           )}
-          <span className="text-[#6b7a99] text-[11px] font-mono">{date}</span>
+          <span className="text-[#6b7a99] text-[11px] font-mono">{dateLabel}</span>
         </div>
       </div>
 
