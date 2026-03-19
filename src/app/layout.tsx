@@ -2,7 +2,7 @@ import type {Metadata} from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'SparkCanvas - Interactive Idea Brainstorming',
+  title: 'Hackaton - Interactive Idea Brainstorming',
   description: 'A premium digital canvas for visual idea organization and creative sparking.',
 };
 
