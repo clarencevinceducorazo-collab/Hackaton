@@ -347,6 +347,7 @@ export default function LandingPage() {
             <a 
               href="#demo" 
               className="btn-primary"
+              style={{ isolation: 'isolate', color: '#020810', WebkitTextFillColor: '#020810' }}
               onMouseEnter={() => toggleCursorHover(true)}
               onMouseLeave={() => toggleCursorHover(false)}
             >
@@ -1004,6 +1005,7 @@ export default function LandingPage() {
               <Link 
                 href="/canvas" 
                 className="btn-primary"
+                style={{ isolation: 'isolate', color: '#020810', WebkitTextFillColor: '#020810' }}
                 onMouseEnter={() => toggleCursorHover(true)}
                 onMouseLeave={() => toggleCursorHover(false)}
               >
@@ -1081,31 +1083,27 @@ export default function LandingPage() {
           display: inline-flex;
           align-items: center;
           gap: 10px;
-          padding: 15px 34px;
+          padding: 16px 36px;
           background: #00d4ff;
-          color: #04070f;
+          color: #020810 !important;
           font-family: 'Plus Jakarta Sans', sans-serif;
-          font-weight: 700;
-          font-size: 14px;
-          letter-spacing: .04em;
-          text-decoration: none;
+          font-weight: 800;
+          font-size: 15px;
+          letter-spacing: .05em;
+          text-decoration: none !important;
           position: relative;
-          overflow: hidden;
-          transition: box-shadow .25s;
+          transition: background .2s, box-shadow .25s, transform .15s;
           clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-          z-index: 1;
+          -webkit-text-fill-color: #020810 !important;
+          text-fill-color: #020810 !important;
+          mix-blend-mode: normal;
         }
-        .btn-primary::after {
-          content: '';
-          position: absolute;
-          inset: 0;
-          background: rgba(255,255,255,0.18);
-          transform: translateX(-120%) skewX(-18deg);
-          transition: transform .45s;
-          z-index: -1;
+        .btn-primary:hover {
+          background: #33deff;
+          box-shadow: 0 0 48px rgba(0,212,255,.55), 0 4px 20px rgba(0,212,255,.3);
+          transform: translateY(-1px);
         }
-        .btn-primary:hover { box-shadow: 0 0 40px rgba(0,212,255,.4); }
-        .btn-primary:hover::after { transform: translateX(130%) skewX(-18deg); }
+        .btn-primary:active { transform: translateY(0); }
 
         .btn-outline {
           display: inline-flex;
