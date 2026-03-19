@@ -1,15 +1,14 @@
 import { http, createConfig, createStorage, cookieStorage } from 'wagmi';
-import { baseSepolia } from 'wagmi/chains';
+import { sepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 /**
- * @fileOverview Wagmi configuration for Base Sepolia.
- * SSR: true ensures compatibility with Next.js App Router.
- * Storage: uses cookieStorage to persist connection state across page reloads.
+ * @fileOverview Wagmi configuration for Ethereum Sepolia.
+ * Sepolia = free Ethereum testnet, no real money.
  */
 
 export const config = createConfig({
-  chains: [baseSepolia],
+  chains: [sepolia],
   ssr: true,
   storage: createStorage({
     storage: cookieStorage,
@@ -19,7 +18,7 @@ export const config = createConfig({
     coinbaseWallet({ appName: 'AI Bounty Board' }),
   ],
   transports: {
-    [baseSepolia.id]: http(),
+    [sepolia.id]: http(),
   },
 });
 

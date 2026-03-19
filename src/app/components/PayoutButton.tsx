@@ -5,8 +5,7 @@ import { useSendTransaction, useWaitForTransactionReceipt } from 'wagmi';
 import { parseEther } from 'viem';
 
 /**
- * @fileOverview Triggers a blockchain payout simulation.
- * Transaction hash = unique ID proving a payment happened on chain.
+ * @fileOverview Triggers an ETH payout on Sepolia.
  */
 
 interface PayoutButtonProps {
@@ -17,10 +16,8 @@ interface PayoutButtonProps {
 }
 
 export function PayoutButton({ recipientAddress, rewardAmount, onPayoutComplete }: PayoutButtonProps) {
-  // useSendTransaction = wagmi hook that fires a blockchain send
   const { data: hash, error, isPending, sendTransaction } = useSendTransaction();
 
-  // Wait for the transaction to be included in a block
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({
     hash,
   });
@@ -32,11 +29,9 @@ export function PayoutButton({ recipientAddress, rewardAmount, onPayoutComplete 
   }, [isConfirmed, hash, onPayoutComplete]);
 
   const handlePayout = () => {
-    // Note: We simulate USDC payout with 0.001 testnet ETH for the demo
-    // In production: replace with ERC-20 USDC transfer using writeContract()
     sendTransaction({
       to: recipientAddress as `0x${string}`,
-      value: parseEther('0.001'),
+      value: parseEther(rewardAmount.toString()),
     });
   };
 
@@ -52,15 +47,15 @@ export function PayoutButton({ recipientAddress, rewardAmount, onPayoutComplete 
             </code>
           </div>
           <a
-            href={`https://sepolia.basescan.org/tx/${hash}`}
+            href={`https://sepolia.etherscan.io/tx/${hash}`}
             target="_blank"
             rel="noopener noreferrer"
             className="inline-block text-[#3b82f6] text-xs font-bold hover:underline"
           >
-            View on Basescan →
+            View on Etherscan →
           </a>
           <p className="text-[11px] text-[#6b7a99]">
-            {rewardAmount} USDC (simulated) sent to {recipientAddress.slice(0, 6)}...{recipientAddress.slice(-4)}
+            {rewardAmount} ETH sent to {recipientAddress.slice(0, 6)}...{recipientAddress.slice(-4)}
           </p>
         </div>
       </div>
@@ -91,16 +86,16 @@ export function PayoutButton({ recipientAddress, rewardAmount, onPayoutComplete 
         {(isPending || isConfirming) ? (
           <div className="flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-2 border-[#050810] border-t-transparent rounded-full animate-spin" />
-            <span>{isConfirming ? 'Confirming on Base...' : 'Sending...'}</span>
+            <span>{isConfirming ? 'Confirming on Sepolia...' : 'Sending...'}</span>
           </div>
         ) : (
           <span className="flex items-center justify-center gap-2">
-            ⚡ Claim {rewardAmount} USDC Reward
+            ⚡ Claim {rewardAmount} ETH Reward
           </span>
         )}
       </button>
       <p className="text-center text-[10px] text-[#6b7a99] mt-3 font-mono tracking-wider uppercase">
-        Payout via Base Sepolia testnet
+        Payout via Ethereum Sepolia testnet
       </p>
     </div>
   );

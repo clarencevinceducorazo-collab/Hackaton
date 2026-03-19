@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAccount, useConnect, useDisconnect, useBalance } from 'wagmi';
-import { baseSepolia } from 'wagmi/chains';
+import { sepolia } from 'wagmi/chains';
 
 /**
- * @fileOverview Smart wallet button managing connection states and balance display.
- * Includes a 'mounted' check to prevent Next.js hydration errors.
+ * @fileOverview Smart wallet button managing connection states and ETH balance display.
  */
 
 export function WalletButton() {
@@ -14,7 +13,6 @@ export function WalletButton() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Prevent hydration mismatch by waiting for mount
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -25,12 +23,11 @@ export function WalletButton() {
 
   const { data: balance } = useBalance({
     address,
-    chainId: baseSepolia.id,
+    chainId: sepolia.id,
   });
 
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
-  // Return a placeholder or skeleton during SSR to avoid mismatch
   if (!mounted) {
     return (
       <button className="px-6 py-2 border border-[#00d4ff] text-[#00d4ff] text-xs font-bold opacity-50 cursor-not-allowed">
@@ -39,7 +36,6 @@ export function WalletButton() {
     );
   }
 
-  // STATE: Connecting
   if (isConnecting) {
     return (
       <button disabled className="flex items-center gap-2 px-5 py-2 border border-[#00d4ff]/30 text-[#00d4ff] rounded-lg text-xs font-bold opacity-70">
@@ -49,7 +45,6 @@ export function WalletButton() {
     );
   }
 
-  // STATE: Connected
   if (isConnected && address) {
     return (
       <div className="relative">
@@ -62,7 +57,7 @@ export function WalletButton() {
             <span className="font-mono text-xs font-bold text-[#eef2ff]">{truncateAddress(address)}</span>
           </div>
           <span className="text-[10px] text-[#6b7a99] font-mono">
-            {balance ? parseFloat(balance.formatted).toFixed(4) : '0.0000'} {balance?.symbol} (testnet)
+            {balance ? parseFloat(balance.formatted).toFixed(4) : '0.0000'} {balance?.symbol}
           </span>
         </button>
 
@@ -83,7 +78,6 @@ export function WalletButton() {
     );
   }
 
-  // STATE: Disconnected
   return (
     <>
       <button
@@ -101,7 +95,7 @@ export function WalletButton() {
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative bg-[#0d1424] w-full max-w-sm rounded-2xl border border-[rgba(59,130,246,0.2)] p-8 modal-enter">
             <h2 className="text-xl font-black text-[#eef2ff] mb-2 tracking-tight">Connect Wallet</h2>
-            <p className="text-sm text-[#6b7a99] mb-6">Choose Base Sepolia testnet wallet</p>
+            <p className="text-sm text-[#6b7a99] mb-6">Choose Sepolia testnet wallet</p>
             
             <div className="flex flex-col gap-3">
               {connectors.map((connector) => (

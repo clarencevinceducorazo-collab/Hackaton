@@ -23,7 +23,6 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
     if (!formData.title || !formData.description || !formData.requirements || !formData.reward) return;
     
     setLoading(true);
-    // Simulate API delay
     await new Promise(r => setTimeout(r, 800));
     
     onPost({
@@ -52,7 +51,7 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
             <input
               required
               className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors"
-              placeholder="e.g. Write a Base L2 explainer"
+              placeholder="e.g. Audit smart contract"
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
             />
@@ -76,20 +75,21 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
               required
               rows={3}
               className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors resize-none"
-              placeholder="List exactly what the submission must include..."
+              placeholder="List criteria..."
               value={formData.requirements}
               onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Reward (USDC)</label>
+            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Reward (ETH)</label>
             <input
               required
               type="number"
-              min="1"
+              step="0.0001"
+              min="0.0001"
               className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors"
-              placeholder="e.g. 10"
+              placeholder="e.g. 0.001"
               value={formData.reward}
               onChange={(e) => setFormData({ ...formData, reward: e.target.value })}
             />

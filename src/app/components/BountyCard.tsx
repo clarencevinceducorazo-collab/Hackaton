@@ -46,7 +46,7 @@ export function BountyCard({ bounty, onSubmit }: BountyCardProps) {
       <div className="flex items-center justify-between mt-auto">
         <div className="bg-[rgba(0,212,255,0.08)] border border-[rgba(0,212,255,0.3)] px-3 py-1.5 rounded-md">
           <span className="text-[#00d4ff] font-mono font-bold text-sm">
-            {bounty.reward} USDC
+            {bounty.reward} ETH
           </span>
         </div>
 

@@ -4,8 +4,7 @@ import React from 'react';
 import { TxEntry } from '../types/transaction';
 
 /**
- * @fileOverview Displays a session-based list of completed blockchain payouts.
- * Basescan = blockchain explorer — like a receipt viewer for txs.
+ * @fileOverview Displays a session-based list of completed Sepolia ETH payouts.
  */
 
 interface TransactionHistoryProps {
@@ -35,7 +34,7 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 <span className="px-2 py-0.5 bg-[#10b981]/10 text-[#10b981] text-[9px] font-bold rounded border border-[#10b981]/20">CONFIRMED</span>
               </div>
               <div className="flex items-center gap-3 text-[10px] text-[#6b7a99] font-mono">
-                <span>0.001 ETH (= {tx.amount} USDC sim)</span>
+                <span>{tx.amount} ETH</span>
                 <span>•</span>
                 <span>{new Date(tx.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
               </div>
@@ -46,11 +45,11 @@ export function TransactionHistory({ transactions }: TransactionHistoryProps) {
                 {tx.txHash.slice(0, 10)}...{tx.txHash.slice(-6)}
               </code>
               <a
-                href={`https://sepolia.basescan.org/tx/${tx.txHash}`}
+                href={`https://sepolia.etherscan.io/tx/${tx.txHash}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 flex items-center justify-center bg-white/5 rounded-lg text-[#3b82f6] hover:bg-[#3b82f6]/10 transition-colors"
-                title="View on Basescan"
+                title="View on Etherscan"
               >
                 ↗
               </a>
