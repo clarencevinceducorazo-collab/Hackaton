@@ -3,7 +3,18 @@
 import React, { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Copy, Check, User, ExternalLink, ChevronDown, ChevronUp, Clock, CheckCircle2, XCircle } from "lucide-react";
+import {
+  ArrowLeft,
+  Copy,
+  Check,
+  User,
+  ExternalLink,
+  ChevronDown,
+  ChevronUp,
+  Clock,
+  CheckCircle2,
+  XCircle,
+} from "lucide-react";
 import { useBounties } from "../hooks/useBounties";
 import { useSubmissions } from "../hooks/useSubmissions";
 import { Bounty } from "../types/bounty";
@@ -33,9 +44,24 @@ const STATUS_CONFIG = {
 };
 
 const SUBMISSION_STATUS_CONFIG = {
-  pending:  { label: 'Pending',  color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',  icon: '⏳' },
-  approved: { label: 'Approved', color: '#10b981', bg: 'rgba(16,185,129,0.1)', icon: '✅' },
-  rejected: { label: 'Rejected', color: '#ef4444', bg: 'rgba(239,68,68,0.1)',  icon: '✗'  },
+  pending: {
+    label: "Pending",
+    color: "#f59e0b",
+    bg: "rgba(245,158,11,0.1)",
+    icon: "⏳",
+  },
+  approved: {
+    label: "Approved",
+    color: "#10b981",
+    bg: "rgba(16,185,129,0.1)",
+    icon: "✅",
+  },
+  rejected: {
+    label: "Rejected",
+    color: "#ef4444",
+    bg: "rgba(239,68,68,0.1)",
+    icon: "✗",
+  },
 };
 
 function truncAddr(addr: string) {
@@ -65,7 +91,11 @@ function SubmissionRow({
         </div>
         <div
           className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold flex-shrink-0"
-          style={{ background: cfg.bg, color: cfg.color, border: `1px solid ${cfg.color}40` }}
+          style={{
+            background: cfg.bg,
+            color: cfg.color,
+            border: `1px solid ${cfg.color}40`,
+          }}
         >
           <span>{cfg.icon}</span>
           <span>{cfg.label}</span>
@@ -93,7 +123,7 @@ function SubmissionRow({
           <Clock className="w-3 h-3" />
           {new Date(submission.submittedAt).toLocaleString()}
         </span>
-        {submission.status === 'pending' && (
+        {submission.status === "pending" && (
           <div className="flex gap-2">
             <button
               onClick={() => onReject(submission.id)}
@@ -126,15 +156,19 @@ function ReviewBountyCard({
   onReject: (id: string) => void;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const pendingCount = submissions.filter((s) => s.status === 'pending').length;
+  const pendingCount = submissions.filter((s) => s.status === "pending").length;
 
   return (
     <div className="bg-[#0d1424] border border-[rgba(245,158,11,0.2)] rounded-2xl overflow-hidden hover:border-[rgba(245,158,11,0.35)] transition-all">
       <div className="p-5">
         <div className="flex items-start justify-between gap-3 mb-3">
           <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-[#eef2ff] mb-1 line-clamp-1">{bounty.title}</h3>
-            <p className="text-xs text-[#6b7a99] line-clamp-2">{bounty.description}</p>
+            <h3 className="text-sm font-bold text-[#eef2ff] mb-1 line-clamp-1">
+              {bounty.title}
+            </h3>
+            <p className="text-xs text-[#6b7a99] line-clamp-2">
+              {bounty.description}
+            </p>
           </div>
           <span className="text-xs text-[#00d4ff] font-mono font-bold flex-shrink-0">
             {bounty.reward.toFixed(4)} ETH
@@ -145,14 +179,18 @@ function ReviewBountyCard({
           <div className="flex items-center gap-3">
             {/* Submission count badge */}
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#a855f7]/10 border border-[#a855f7]/30">
-              <span className="text-sm font-black text-[#a855f7]">{submissions.length}</span>
+              <span className="text-sm font-black text-[#a855f7]">
+                {submissions.length}
+              </span>
               <span className="text-[10px] text-[#a855f7] font-bold">
-                {submissions.length === 1 ? 'submission' : 'submissions'}
+                {submissions.length === 1 ? "submission" : "submissions"}
               </span>
             </div>
             {pendingCount > 0 && (
               <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/30">
-                <span className="text-[10px] font-bold text-[#f59e0b]">{pendingCount} pending</span>
+                <span className="text-[10px] font-bold text-[#f59e0b]">
+                  {pendingCount} pending
+                </span>
               </div>
             )}
           </div>
@@ -161,9 +199,13 @@ function ReviewBountyCard({
             className="flex items-center gap-1.5 text-xs text-[#6b7a99] hover:text-[#eef2ff] transition-colors font-medium"
           >
             {expanded ? (
-              <><ChevronUp className="w-4 h-4" /> Hide</>
+              <>
+                <ChevronUp className="w-4 h-4" /> Hide
+              </>
             ) : (
-              <><ChevronDown className="w-4 h-4" /> View submissions</>
+              <>
+                <ChevronDown className="w-4 h-4" /> View submissions
+              </>
             )}
           </button>
         </div>
@@ -172,7 +214,9 @@ function ReviewBountyCard({
       {expanded && (
         <div className="border-t border-[rgba(59,130,246,0.1)] p-5 flex flex-col gap-3">
           {submissions.length === 0 ? (
-            <p className="text-xs text-[#6b7a99] text-center py-4">No submissions yet</p>
+            <p className="text-xs text-[#6b7a99] text-center py-4">
+              No submissions yet
+            </p>
           ) : (
             submissions.map((sub) => (
               <SubmissionRow
@@ -214,7 +258,9 @@ function BountyProjectCard({
         </div>
         {submissionCount !== undefined && submissionCount > 0 && (
           <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#a855f7]/20 border border-[#a855f7]/40">
-            <span className="text-[10px] font-bold text-[#a855f7]">{submissionCount} submitted</span>
+            <span className="text-[10px] font-bold text-[#a855f7]">
+              {submissionCount} submitted
+            </span>
           </div>
         )}
       </div>
@@ -253,7 +299,12 @@ export default function ProfilePage() {
   const { address, isConnected } = useAccount();
   const router = useRouter();
   const { bounties, isLoaded } = useBounties();
-  const { getSubmissionsForBounty, getSubmissionCountForBounty, updateSubmissionStatus, isLoaded: subsLoaded } = useSubmissions();
+  const {
+    getSubmissionsForBounty,
+    getSubmissionCountForBounty,
+    updateSubmissionStatus,
+    isLoaded: subsLoaded,
+  } = useSubmissions();
   const [activeTab, setActiveTab] = useState<Tab>("projects");
   const [copied, setCopied] = useState(false);
   const [projectFilter, setProjectFilter] = useState("All Projects");
@@ -491,19 +542,32 @@ export default function ProfilePage() {
             {inReviewBounties.length > 0 && (
               <div className="grid grid-cols-3 gap-4 mb-6">
                 <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] rounded-xl p-4 text-center">
-                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">Bounties in Review</p>
-                  <p className="text-2xl font-black text-[#f59e0b] font-mono">{inReviewBounties.length}</p>
-                </div>
-                <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] rounded-xl p-4 text-center">
-                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">Total Submissions</p>
-                  <p className="text-2xl font-black text-[#a855f7] font-mono">
-                    {inReviewBounties.reduce((acc, b) => acc + getSubmissionCountForBounty(b.id), 0)}
+                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">
+                    Bounties in Review
+                  </p>
+                  <p className="text-2xl font-black text-[#f59e0b] font-mono">
+                    {inReviewBounties.length}
                   </p>
                 </div>
                 <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] rounded-xl p-4 text-center">
-                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">Rewards at Stake</p>
+                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">
+                    Total Submissions
+                  </p>
+                  <p className="text-2xl font-black text-[#a855f7] font-mono">
+                    {inReviewBounties.reduce(
+                      (acc, b) => acc + getSubmissionCountForBounty(b.id),
+                      0,
+                    )}
+                  </p>
+                </div>
+                <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] rounded-xl p-4 text-center">
+                  <p className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-wider mb-1">
+                    Rewards at Stake
+                  </p>
                   <p className="text-2xl font-black text-[#00d4ff] font-mono">
-                    {inReviewBounties.reduce((acc, b) => acc + b.reward, 0).toFixed(4)}
+                    {inReviewBounties
+                      .reduce((acc, b) => acc + b.reward, 0)
+                      .toFixed(4)}
                   </p>
                 </div>
               </div>
@@ -518,8 +582,8 @@ export default function ProfilePage() {
                     key={b.id}
                     bounty={b}
                     submissions={getSubmissionsForBounty(b.id)}
-                    onApprove={(id) => updateSubmissionStatus(id, 'approved')}
-                    onReject={(id) => updateSubmissionStatus(id, 'rejected')}
+                    onApprove={(id) => updateSubmissionStatus(id, "approved")}
+                    onReject={(id) => updateSubmissionStatus(id, "rejected")}
                   />
                 ))}
               </div>

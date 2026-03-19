@@ -5,5 +5,5 @@ export interface Submission {
   githubRepo: string;
   description: string;
   submittedAt: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
 }
