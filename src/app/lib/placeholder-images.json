@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "canvas-intro",
+      "description": "Abstract colorful shapes for creative spark",
+      "imageUrl": "https://picsum.photos/seed/spark1/600/400",
+      "imageHint": "abstract creative"
+    },
+    {
+      "id": "team-collaboration",
+      "description": "Team brainstorming illustration",
+      "imageUrl": "https://picsum.photos/seed/spark2/600/400",
+      "imageHint": "collaboration brainstorming"
+    }
+  ]
+}
