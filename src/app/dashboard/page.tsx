@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useBounties } from "../hooks/useBounties";
 import { BountyCard } from "../components/BountyCard";
@@ -13,11 +13,10 @@ import { FilterBar } from "../components/FilterBar";
 import { Toast } from "../components/Toast";
 import { WalletButton } from "../components/WalletButton";
 import { NetworkBadge } from "../components/NetworkBadge";
-import { PayoutButton } from "../components/PayoutButton";
 import { TransactionHistory } from "../components/TransactionHistory";
 import { TxEntry } from "../types/transaction";
 import { useAccount } from "wagmi";
-import { User, Zap } from "lucide-react";
+import { User, Zap, Trophy, ShieldCheck } from "lucide-react";
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount();
@@ -34,15 +33,6 @@ export default function DashboardPage() {
   // ── Detail modal state ─────────────────────────────────────────────────────
   const [selectedBounty, setSelectedBounty] = useState<any | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
-
-  // ── AI review state ────────────────────────────────────────────────────────
-  const [submittingBountyId, setSubmittingBountyId] = useState<string | null>(
-    null,
-  );
-  const [aiVerdict, setAiVerdict] = useState<{
-    status: "APPROVED" | "REJECTED";
-    reason: string;
-  } | null>(null);
 
   // ── Derived ────────────────────────────────────────────────────────────────
   const filteredBounties = bounties.filter(
@@ -64,61 +54,28 @@ export default function DashboardPage() {
     setToast({ message: "Bounty posted successfully!", type: "success" });
   };
 
-  /** Open the detail modal when a card is clicked */
   const handleCardClick = (bounty: any) => {
     setSelectedBounty(bounty);
     setIsDetailOpen(true);
   };
 
-  /**
-   * Called by BountyDetailModal when the user completes the submit-work form.
-   */
-  const handleSubmitWork = (bounty: any, submission: WorkSubmission) => {
+  const handleApproved = useCallback((bountyId: string) => {
+    // In Feature 4.4 we wire real ETH payouts. For now, update local status.
+    updateBountyStatus(bountyId, 'PAID');
     setIsDetailOpen(false);
-    setSubmittingBountyId(bounty.id);
+    setSelectedBounty(null);
     setToast({
-      message: "Submission received! AI judge is reviewing...",
-      type: "info",
-    });
-
-    // Simulated AI Judge Logic
-    setTimeout(() => {
-      setAiVerdict({
-        status: "APPROVED",
-        reason:
-          "Submission explicitly addresses all requirements. The code is well-structured and follows best practices for Ethereum development.",
-      });
-      updateBountyStatus(bounty.id, "IN_REVIEW");
-    }, 2500);
-  };
-
-  const handlePayoutComplete = (txHash: string, bounty: any) => {
-    updateBountyStatus(bounty.id, "PAID");
-    setTransactions((prev) => [
-      {
-        txHash,
-        amount: bounty.reward,
-        recipient: address || "0x...",
-        timestamp: new Date().toISOString(),
-        bountyTitle: bounty.title,
-        status: "confirmed",
-      },
-      ...prev,
-    ]);
-    setToast({
-      message: "Payout confirmed! TX: " + txHash.slice(0, 10),
+      message: "Submission approved! Your reward is ready 🎉",
       type: "success",
     });
-    setSubmittingBountyId(null);
-    setAiVerdict(null);
-  };
+  }, [updateBountyStatus]);
 
   if (!isLoaded) return null;
 
   return (
     <div className="min-h-screen bg-[#050810] text-[#eef2ff] font-['DM_Sans'] selection:bg-[#00d4ff]/30">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 h-16 bg-[#050810]/80 backdrop-blur-xl border-b border-[rgba(59,130,246,0.12)] z-[100] px-8 flex items-center justify-between">
+      <nav className="fixed top-0 left-0 right-0 h-16 bg-[#050810]/80 backdrop-blur-xl border-b border-white/[0.05] z-[100] px-8 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/")}>
           <div className="w-8 h-8 bg-[#00d4ff] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)] animate-pulse shadow-[0_0_15px_rgba(0,212,255,0.4)]" />
           <span className="font-extrabold tracking-tighter text-lg">
@@ -166,139 +123,49 @@ export default function DashboardPage() {
       <main className="pt-28 pb-20 px-8 max-w-[1400px] mx-auto">
         {/* STATS BAR */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-colors">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#00d4ff] transition-colors">
-              Total Bounties
-            </span>
-            <span className="text-3xl font-black text-[#eef2ff] font-mono">
-              {counts.ALL}
-            </span>
+          <div className="bg-[#0d1424] border border-white/5 p-6 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-all duration-300">
+            <span className="text-[10px] text-[#6b7a99] font-black uppercase tracking-[0.2em] mb-2 group-hover:text-[#00d4ff] transition-colors">Active Bounties</span>
+            <span className="text-4xl font-black text-[#eef2ff] font-mono tracking-tighter">{counts.ALL}</span>
           </div>
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#10b981]/30 transition-colors">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#10b981] transition-colors">
-              Open Opportunities
-            </span>
-            <span className="text-3xl font-black text-[#10b981] font-mono">
-              {counts.OPEN}
-            </span>
+          <div className="bg-[#0d1424] border border-white/5 p-6 rounded-2xl flex flex-col items-center group hover:border-[#10b981]/30 transition-all duration-300">
+            <Trophy className="w-4 h-4 text-[#10b981] mb-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <span className="text-[10px] text-[#6b7a99] font-black uppercase tracking-[0.2em] mb-2 group-hover:text-[#10b981] transition-colors">Completed</span>
+            <span className="text-4xl font-black text-[#10b981] font-mono tracking-tighter">{counts.PAID}</span>
           </div>
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-colors">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#00d4ff] transition-colors">
-              Total Reward Pool
-            </span>
-            <span className="text-3xl font-black text-[#00d4ff] font-mono">
-              {totalRewards.toFixed(4)} ETH
-            </span>
+          <div className="bg-[#0d1424] border border-white/5 p-6 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-all duration-300">
+            <ShieldCheck className="w-4 h-4 text-[#00d4ff] mb-2 opacity-50 group-hover:opacity-100 transition-opacity" />
+            <span className="text-[10px] text-[#6b7a99] font-black uppercase tracking-[0.2em] mb-2 group-hover:text-[#00d4ff] transition-colors">Total Staked</span>
+            <span className="text-4xl font-black text-[#00d4ff] font-mono tracking-tighter">{totalRewards.toFixed(3)} <span className="text-lg">ETH</span></span>
           </div>
         </div>
 
-        {/* AI REVIEW OVERLAY */}
-        {submittingBountyId && aiVerdict && (
-          <div className="mb-12 p-8 bg-[#10b981]/5 border border-[#10b981]/30 rounded-2xl animate-fade-in shadow-[0_0_30px_rgba(16,185,129,0.1)]">
-            <div className="flex flex-col md:flex-row gap-8 items-center">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-[#10b981] rounded-full flex items-center justify-center text-xl shadow-[0_0_15px_#10b981]">
-                    🤖
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-black text-[#10b981]">
-                      AI VERDICT: {aiVerdict.status}
-                    </h3>
-                    <p className="text-xs text-[#6b7a99] font-mono">
-                      Confidence: 94% • Evaluated by Gemini 1.5 Flash
-                    </p>
-                  </div>
-                </div>
-                <p className="text-[#c7d2fe] text-sm leading-relaxed italic border-l-2 border-[#10b981]/30 pl-4 py-1">
-                  "{aiVerdict.reason}"
-                </p>
-              </div>
-              <div className="w-full md:w-80">
-                {address ? (
-                  <PayoutButton
-                    recipientAddress={address}
-                    rewardAmount={
-                      bounties.find((b) => b.id === submittingBountyId)
-                        ?.reward || 0
-                    }
-                    bountyId={submittingBountyId}
-                    onPayoutComplete={(hash) =>
-                      handlePayoutComplete(
-                        hash,
-                        bounties.find((b) => b.id === submittingBountyId),
-                      )
-                    }
-                  />
-                ) : (
-                  <div className="text-center p-6 border-2 border-dashed border-[#6b7a99]/30 rounded-xl bg-black/20">
-                    <p className="text-xs text-[#6b7a99] mb-4 font-bold uppercase tracking-widest">
-                      Connection Required
-                    </p>
-                    <WalletButton />
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        )}
+        <FilterBar activeFilter={activeFilter} onFilterChange={setActiveFilter} counts={counts} />
 
-        {/* FILTERS */}
-        <FilterBar
-          activeFilter={activeFilter}
-          onFilterChange={setActiveFilter}
-          counts={counts}
-        />
-
-        {/* GRID — cards are clickable to open detail modal */}
+        {/* GRID */}
         {filteredBounties.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBounties.map((b) => (
-              <div
-                key={b.id}
-                onClick={() => handleCardClick(b)}
-                className="cursor-pointer group"
-                role="button"
-                tabIndex={0}
-                onKeyDown={(e) => e.key === "Enter" && handleCardClick(b)}
-                aria-label={`View details for ${b.title}`}
-              >
+              <div key={b.id} onClick={() => handleCardClick(b)} className="cursor-pointer group">
                 <BountyCard bounty={b} onSubmit={() => handleCardClick(b)} />
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-32 bg-[#0d1424]/40 rounded-3xl border border-dashed border-[rgba(59,130,246,0.15)] backdrop-blur-sm">
+          <div className="flex flex-col items-center justify-center py-32 bg-[#0d1424]/40 rounded-3xl border border-dashed border-white/10 backdrop-blur-sm">
             <div className="w-20 h-20 border-2 border-dashed border-[#6b7a99]/40 rounded-full flex items-center justify-center mb-6 opacity-40">
               <span className="text-4xl text-[#6b7a99]">?</span>
             </div>
-            <h3 className="text-2xl font-black text-[#6b7a99] mb-2 tracking-tight">
-              No bounties found
-            </h3>
-            <p className="text-[#6b7a99] font-medium">
-              Try switching filters or create a new challenge.
-            </p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="mt-8 text-[#00d4ff] font-bold hover:underline hover:text-[#00d4ff]/80 transition-colors flex items-center gap-2"
-            >
-              Post First Bounty <Zap size={14} />
-            </button>
+            <h3 className="text-2xl font-black text-[#6b7a99] mb-2 tracking-tight">No bounties found</h3>
+            <p className="text-[#6b7a99] font-medium">Try switching filters or create a new challenge.</p>
           </div>
         )}
 
-        {/* TRANSACTION HISTORY */}
         <TransactionHistory transactions={transactions} />
       </main>
 
-      {/* POST BOUNTY MODAL */}
-      <BountyModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onPost={handlePostBounty}
-      />
+      {/* MODALS */}
+      <BountyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onPost={handlePostBounty} />
 
-      {/* BOUNTY DETAIL / SUBMIT MODAL */}
       <BountyDetailModal
         bounty={selectedBounty}
         isOpen={isDetailOpen}
@@ -306,17 +173,12 @@ export default function DashboardPage() {
           setIsDetailOpen(false);
           setSelectedBounty(null);
         }}
-        onSubmitWork={handleSubmitWork}
+        onSubmitWork={() => {}}
+        onApproved={handleApproved}
       />
 
       {/* TOAST */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 }
