@@ -1,0 +1,118 @@
+'use client';
+import React, { useState } from 'react';
+
+interface BountyModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onPost: (bounty: any) => void;
+}
+
+export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
+  const [formData, setFormData] = useState({
+    title: '',
+    description: '',
+    requirements: '',
+    reward: '',
+  });
+  const [loading, setLoading] = useState(false);
+
+  if (!isOpen) return null;
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title || !formData.description || !formData.requirements || !formData.reward) return;
+    
+    setLoading(true);
+    // Simulate API delay
+    await new Promise(r => setTimeout(r, 800));
+    
+    onPost({
+      ...formData,
+      reward: parseFloat(formData.reward),
+      status: 'OPEN',
+    });
+    
+    setLoading(false);
+    setFormData({ title: '', description: '', requirements: '', reward: '' });
+  };
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
+      <div 
+        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
+        onClick={onClose}
+      />
+      
+      <div className="relative bg-[#0d1424] w-full max-w-lg rounded-2xl border border-[rgba(59,130,246,0.2)] shadow-2xl p-8 modal-enter">
+        <h2 className="text-2xl font-black text-[#eef2ff] mb-6 tracking-tight">Post New Bounty</h2>
+        
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div>
+            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Bounty Title</label>
+            <input
+              required
+              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors"
+              placeholder="e.g. Write a Base L2 explainer"
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Description</label>
+            <textarea
+              required
+              rows={3}
+              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors resize-none"
+              placeholder="What is this bounty about?"
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Requirements</label>
+            <textarea
+              required
+              rows={3}
+              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors resize-none"
+              placeholder="List exactly what the submission must include..."
+              value={formData.requirements}
+              onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+            />
+          </div>
+
+          <div>
+            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Reward (USDC)</label>
+            <input
+              required
+              type="number"
+              min="1"
+              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors"
+              placeholder="e.g. 10"
+              value={formData.reward}
+              onChange={(e) => setFormData({ ...formData, reward: e.target.value })}
+            />
+          </div>
+
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-6 py-3 border border-[rgba(255,255,255,0.1)] text-[#94a3b8] font-bold text-sm rounded-xl hover:bg-white/5 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex-1 px-6 py-3 bg-[#3b82f6] hover:bg-[#00d4ff] text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? 'Posting...' : 'Post Bounty'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
