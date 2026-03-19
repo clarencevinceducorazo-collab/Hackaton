@@ -93,11 +93,11 @@ export function WalletButton() {
       {showModal && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-          <div className="relative bg-[#0d1424] w-full max-w-sm rounded-2xl border border-[rgba(59,130,246,0.2)] p-8 modal-enter">
+          <div className="relative bg-[#0d1424] w-full max-w-sm rounded-2xl border border-[rgba(59,130,246,0.2)] p-8 modal-enter flex flex-col max-h-[90vh] overflow-hidden">
             <h2 className="text-xl font-black text-[#eef2ff] mb-2 tracking-tight">Connect Wallet</h2>
             <p className="text-sm text-[#6b7a99] mb-6">Choose Sepolia testnet wallet</p>
             
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
               {connectors.map((connector) => (
                 <button
                   key={connector.id}
@@ -105,7 +105,7 @@ export function WalletButton() {
                     connect({ connector });
                     setShowModal(false);
                   }}
-                  className="w-full flex items-center justify-between p-4 bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl hover:border-[#00d4ff] hover:bg-[#00d4ff]/5 transition-all group"
+                  className="w-full flex-shrink-0 flex items-center justify-between p-4 bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl hover:border-[#00d4ff] hover:bg-[#00d4ff]/5 transition-all group"
                 >
                   <span className="font-bold text-sm text-[#eef2ff] group-hover:text-[#00d4ff]">
                     {connector.name}
@@ -117,7 +117,7 @@ export function WalletButton() {
               ))}
             </div>
 
-            <p className="mt-6 text-[11px] text-center text-[#6b7a99]">
+            <p className="mt-6 text-[11px] text-center text-[#6b7a99] flex-shrink-0">
               No wallet found? Install{' '}
               <a href="https://metamask.io" target="_blank" rel="noopener noreferrer" className="text-[#00d4ff] hover:underline">
                 MetaMask
