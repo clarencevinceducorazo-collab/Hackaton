@@ -4,109 +4,78 @@
 
 @layer base {
   :root {
-    /* Primary: #8686D8 (Lavender-Blue) */
-    /* Background: #EBEBFA (Pale Lavender) */
-    /* Accent: #2679E1 (Vibrant Blue) */
-    --background: 240 67% 96%; /* #EBEBFA approx */
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --primary: 240 52% 69%; /* #8686D8 approx */
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 214 74% 51%; /* #2679E1 approx */
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 84.2% 60.2%;
+    --background: 222 47% 4%;
+    --foreground: 210 40% 98%;
+    --card: 222 47% 7%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222 47% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 191 100% 50%;
+    --primary-foreground: 222 47% 4%;
+    --secondary: 222 47% 11%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 222 47% 11%;
+    --muted-foreground: 215 16% 56%;
+    --accent: 191 100% 50%;
+    --accent-foreground: 222 47% 4%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 240 52% 69%;
-    --radius: 1rem;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 191 100% 50%;
+    --radius: 0.75rem;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground font-body antialiased selection:bg-primary/30;
-  }
+body {
+  @apply bg-[#050810] text-[#eef2ff];
 }
 
-@layer components {
-  .glass-panel {
-    @apply bg-white/65 backdrop-blur-xl border-2 border-white/80 shadow-xl;
-  }
-
-  .toy-card {
-    @apply bg-gradient-to-br from-white to-blue-50/30 rounded-3xl transition-all duration-500;
-    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
-    box-shadow: 8px 8px 16px rgba(134, 134, 216, 0.1), -8px -8px 16px #ffffff;
-  }
-
-  .toy-card:hover {
-    @apply -translate-y-2 scale-[1.02];
-    box-shadow: 12px 12px 24px rgba(134, 134, 216, 0.15), -12px -12px 24px #ffffff;
-  }
-
-  .squishy-btn {
-    @apply transition-transform active:scale-95;
-  }
-
-  .shine-effect {
-    @apply relative overflow-hidden;
-  }
-
-  .shine-effect::after {
-    content: '';
-    @apply absolute top-0 -left-full w-1/2 h-full bg-gradient-to-r from-transparent via-white/60 to-transparent -skew-x-[20deg];
-    animation: shine-sweep 4s infinite;
-  }
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+::-webkit-scrollbar-track {
+  background: #050810;
 }
 
-@keyframes float-delayed {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 10px;
 }
 
-@keyframes spin-slow {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+::-webkit-scrollbar-thumb:hover {
+  background: #00d4ff;
 }
 
-@keyframes shine-sweep {
-  0% { left: -100%; }
-  100% { left: 200%; }
+/* Animations */
+@keyframes modal-in {
+  from { opacity: 0; transform: scale(0.95) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-@keyframes blob-pulse {
-  0%, 100% { transform: scale(1); opacity: 0.4; }
-  50% { transform: scale(1.1); opacity: 0.6; }
+.modal-enter {
+  animation: modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+@keyframes toast-in {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
 }
 
-.animate-float-delayed {
-  animation: float-delayed 7s ease-in-out infinite 1s;
+.toast-enter {
+  animation: toast-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.animate-spin-slow {
-  animation: spin-slow 12s linear infinite;
+/* Shimmer Loading */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }
 
-.animate-blob {
-  animation: blob-pulse 8s infinite;
+.animate-shimmer {
+  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
 }
