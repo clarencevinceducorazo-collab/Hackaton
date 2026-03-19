@@ -1,59 +1,50 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { useAccount, useChainId, useSwitchChain } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
+import { useAccount, useSwitchChain } from 'wagmi';
+import { baseSepolia } from '../lib/wagmi-config';
 
 /**
- * @fileOverview Navbar indicator for Ethereum Sepolia network status.
+ * @fileOverview Live network status indicator.
  */
 
 export function NetworkBadge() {
   const [mounted, setMounted] = useState(false);
-  const { isConnected } = useAccount();
-  const chainId = useChainId();
+  const { isConnected, chainId } = useAccount();
   const { switchChain } = useSwitchChain();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => setMounted(true), []);
 
-  if (!mounted) {
-    return (
-      <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
-        <div className="w-2 h-2 bg-[#6b7a99] rounded-full" />
-        <span className="text-[#6b7a99] text-[10px] font-mono font-bold tracking-widest uppercase">Sepolia Testnet</span>
-      </div>
-    );
-  }
+  if (!mounted) return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 opacity-50">
+      <div className="w-2 h-2 rounded-full bg-gray-500" />
+      <span className="text-[11px] font-mono text-gray-400">Loading...</span>
+    </div>
+  );
 
-  const isWrongNetwork = isConnected && chainId !== sepolia.id;
+  const isWrongNetwork = isConnected && chainId !== baseSepolia.id;
 
-  if (!isConnected) {
-    return (
-      <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-full">
-        <div className="w-2 h-2 bg-[#6b7a99] rounded-full" />
-        <span className="text-[#6b7a99] text-[10px] font-mono font-bold tracking-widest uppercase">Sepolia Testnet</span>
-      </div>
-    );
-  }
+  if (!isConnected) return (
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-white/10 bg-white/5">
+      <div className="w-2 h-2 rounded-full bg-gray-500" />
+      <span className="text-[11px] font-mono text-[#6b7a99]">Base Sepolia Testnet</span>
+    </div>
+  );
 
-  if (isWrongNetwork) {
-    return (
-      <button 
-        onClick={() => switchChain({ chainId: sepolia.id })}
-        className="flex items-center gap-2 bg-[#f59e0b]/10 border border-[#f59e0b]/30 px-3 py-1.5 rounded-full hover:bg-[#f59e0b]/20 transition-colors"
-      >
-        <div className="w-2 h-2 bg-[#f59e0b] rounded-full animate-pulse" />
-        <span className="text-[#f59e0b] text-[10px] font-mono font-bold tracking-widest uppercase">Switch to Sepolia</span>
-      </button>
-    );
-  }
+  if (isWrongNetwork) return (
+    <button 
+      onClick={() => switchChain({ chainId: baseSepolia.id })}
+      className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-colors"
+    >
+      <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+      <span className="text-[11px] font-mono text-amber-500">Switch to Base Sepolia</span>
+    </button>
+  );
 
   return (
-    <div className="flex items-center gap-2 bg-[#10b981]/10 border border-[#10b981]/30 px-3 py-1.5 rounded-full">
-      <div className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse shadow-[0_0_8px_#10b981]" />
-      <span className="text-[#10b981] text-[10px] font-mono font-bold tracking-widest uppercase">⚡ Sepolia</span>
+    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-[#10b981]/30 bg-[#10b981]/10">
+      <div className="w-2 h-2 rounded-full bg-[#10b981] animate-dot-pulse" />
+      <span className="text-[11px] font-mono text-[#10b981]">Base Sepolia</span>
     </div>
   );
 }

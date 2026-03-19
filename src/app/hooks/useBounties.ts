@@ -1,88 +1,45 @@
 'use client';
+
 import { useState, useEffect } from 'react';
-import { Bounty } from '../types/bounty';
+import { Bounty } from '../types';
+import { loadBounties, saveBounties } from '../lib/storage';
 
-const STORAGE_KEY = 'bounty_board_data';
-
-const INITIAL_BOUNTIES: Bounty[] = [
-  {
-    id: '1',
-    title: 'Write a Sepolia ETH Explainer',
-    description: 'Create a 300-word blog post explaining why Sepolia is the best testnet for developers.',
-    requirements: 'Must mention free ETH from faucets, security, and smart contract testing. Tone should be technical.',
-    reward: 0.001,
-    status: 'OPEN',
-    createdAt: '2024-03-20T10:00:00.000Z',
-    creatorAddress: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F'
-  },
-  {
-    id: '2',
-    title: 'Design a Hero Component',
-    description: 'Create a clean, futuristic hero section using Tailwind CSS.',
-    requirements: 'Must include a CTA, background grid, and be responsive.',
-    reward: 0.0025,
-    status: 'IN_REVIEW',
-    createdAt: '2024-03-19T15:30:00.000Z',
-    creatorAddress: '0x2546Bc497E258ce2D5166661492293C459641120'
-  },
-  {
-    id: '3',
-    title: 'Audit a Simple Smart Contract',
-    description: 'Find reentrancy vulnerabilities in the provided Solidity code.',
-    requirements: 'Provide a short report of findings and fixed code.',
-    reward: 0.005,
-    status: 'PAID',
-    createdAt: '2024-03-18T09:15:00.000Z',
-    creatorAddress: '0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC'
-  },
-];
+/**
+ * @fileOverview State management hook for Bounties.
+ */
 
 export function useBounties() {
   const [bounties, setBounties] = useState<Bounty[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      try {
-        setBounties(JSON.parse(saved));
-      } catch (e) {
-        setBounties(INITIAL_BOUNTIES);
-      }
-    } else {
-      setBounties(INITIAL_BOUNTIES);
-    }
-    setIsLoaded(true);
+    setBounties(loadBounties());
+    setIsMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(bounties));
-    }
-  }, [bounties, isLoaded]);
-
-  const addBounty = (bounty: Omit<Bounty, 'id' | 'createdAt'>) => {
+  const addBounty = (data: Omit<Bounty, 'id' | 'createdAt' | 'status'>) => {
     const newBounty: Bounty = {
-      ...bounty,
+      ...data,
       id: crypto.randomUUID(),
+      status: 'OPEN',
       createdAt: new Date().toISOString(),
     };
-    setBounties((prev) => [newBounty, ...prev]);
-  };
-
-  const updateBounty = (id: string, updates: Partial<Bounty>) => {
-    setBounties((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
-    );
+    const next = [newBounty, ...bounties];
+    setBounties(next);
+    saveBounties(next);
   };
 
   const updateBountyStatus = (id: string, status: Bounty['status']) => {
-    updateBounty(id, { status });
+    const next = bounties.map(b => b.id === id ? { ...b, status } : b);
+    setBounties(next);
+    saveBounties(next);
   };
 
   const deleteBounty = (id: string) => {
-    setBounties((prev) => prev.filter((b) => b.id !== id));
+    const next = bounties.filter(b => b.id !== id);
+    setBounties(next);
+    saveBounties(next);
   };
 
-  return { bounties, addBounty, updateBounty, updateBountyStatus, deleteBounty, isLoaded };
+  return { bounties, addBounty, updateBountyStatus, deleteBounty, isLoaded: isMounted };
 }

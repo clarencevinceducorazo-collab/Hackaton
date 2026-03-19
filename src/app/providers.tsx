@@ -6,11 +6,11 @@ import { config } from '@/app/lib/wagmi-config';
 import { useState } from 'react';
 
 /**
- * @fileOverview App-wide providers for Wagmi (blockchain state) and React Query (data fetching).
+ * @fileOverview React context provider wrapper.
  */
 
 export function Providers({ children }: { children: React.ReactNode }) {
-  // Create a new QueryClient instance to handle blockchain data caching
+  // Prevent re-creating QueryClient on every render
   const [queryClient] = useState(() => new QueryClient());
 
   return (

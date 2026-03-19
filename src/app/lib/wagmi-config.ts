@@ -1,25 +1,22 @@
-import { http, createConfig, createStorage, cookieStorage } from 'wagmi';
-import { sepolia } from 'wagmi/chains';
+import { http, createConfig } from 'wagmi';
+import { baseSepolia } from 'wagmi/chains';
 import { coinbaseWallet, injected } from 'wagmi/connectors';
 
 /**
- * @fileOverview Wagmi configuration for Ethereum Sepolia.
- * Sepolia = free Ethereum testnet, no real money.
+ * @fileOverview wagmi configuration for Base Sepolia testnet.
+ * Base Sepolia = test version of Base blockchain, ETH is fake and free.
  */
 
 export const config = createConfig({
-  chains: [sepolia],
-  ssr: true,
-  storage: createStorage({
-    storage: cookieStorage,
-  }),
+  chains: [baseSepolia],
+  ssr: true, // Server-side rendering support
   connectors: [
-    injected(),
+    injected(), // Supports MetaMask and Brave
     coinbaseWallet({ appName: 'AI Bounty Board' }),
   ],
   transports: {
-    [sepolia.id]: http(),
+    [baseSepolia.id]: http(), // Standard connection protocol
   },
 });
 
-export default config;
+export { baseSepolia };

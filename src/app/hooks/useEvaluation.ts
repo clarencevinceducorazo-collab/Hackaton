@@ -1,10 +1,11 @@
 'use client';
-/**
- * @fileOverview Hook to manage the AI evaluation lifecycle.
- */
 
 import { useState } from 'react';
-import { EvaluationRequest, EvaluationResult } from '../types/evaluation';
+import { EvaluationRequest, EvaluationResult } from '../types';
+
+/**
+ * @fileOverview Hook to interface with the AI Judge API route.
+ */
 
 export function useEvaluation() {
   const [isEvaluating, setIsEvaluating] = useState(false);
@@ -16,7 +17,6 @@ export function useEvaluation() {
     setIsEvaluating(true);
     setError(null);
     setResult(null);
-    setEvaluationMs(null);
 
     try {
       const response = await fetch('/api/evaluate', {
@@ -28,23 +28,23 @@ export function useEvaluation() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Evaluation failed');
+        throw new Error(data.error || 'AI Evaluation failed');
       }
 
       setResult(data);
       setEvaluationMs(data.evaluationMs);
     } catch (err: any) {
-      setError(err.message);
+      setError(err.message || 'AI service unavailable');
     } finally {
       setIsEvaluating(false);
     }
   };
 
   const reset = () => {
+    setIsEvaluating(false);
     setResult(null);
     setError(null);
     setEvaluationMs(null);
-    setIsEvaluating(false);
   };
 
   return { isEvaluating, result, error, evaluationMs, evaluate, reset };

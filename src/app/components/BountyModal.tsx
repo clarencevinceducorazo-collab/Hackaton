@@ -1,147 +1,101 @@
 'use client';
-import React, { useState, useEffect } from 'react';
-import { useAccount } from 'wagmi';
-import { User, X } from 'lucide-react';
-import { Bounty } from '../types/bounty';
+
+import React, { useState } from 'react';
+import { X, DollarSign, Brain } from 'lucide-react';
+
+/**
+ * @fileOverview Creation modal for new bounties.
+ */
 
 interface BountyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onPost: (bounty: any) => void;
-  initialData?: Bounty | null;
+  onSubmit: (data: any) => void;
 }
 
-export function BountyModal({ isOpen, onClose, onPost, initialData }: BountyModalProps) {
-  const { address, isConnected } = useAccount();
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    requirements: '',
-    reward: '',
-  });
+export function BountyModal({ isOpen, onClose, onSubmit }: BountyModalProps) {
+  const [formData, setFormData] = useState({ title: '', description: '', requirements: '', reward: '' });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (initialData) {
-      setFormData({
-        title: initialData.title,
-        description: initialData.description,
-        requirements: initialData.requirements,
-        reward: initialData.reward.toString(),
-      });
-    } else {
-      setFormData({ title: '', description: '', requirements: '', reward: '' });
-    }
-  }, [initialData, isOpen]);
-
   if (!isOpen) return null;
-
-  const isEdit = !!initialData;
-  const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.title || !formData.description || !formData.requirements || !formData.reward) return;
     
     setLoading(true);
-    // Simulate prep
+    // Simulate slight prep time
     await new Promise(r => setTimeout(r, 600));
-    
-    onPost({
-      ...formData,
-      id: initialData?.id,
-      reward: parseFloat(formData.reward),
-      status: initialData?.status || 'OPEN',
-    });
-    
+    onSubmit({ ...formData, reward: parseFloat(formData.reward) });
     setLoading(false);
-    onClose();
+    setFormData({ title: '', description: '', requirements: '', reward: '' });
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
-      <div 
-        className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-fadeIn" onClick={onClose} />
       
-      <div className="relative bg-[#0d1424] w-full max-w-lg rounded-2xl border border-[rgba(59,130,246,0.2)] shadow-2xl p-8 modal-enter overflow-hidden">
-        {/* Background Glow */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#3b82f6]/10 blur-[60px] rounded-full pointer-events-none" />
+      <div className="relative bg-[#0d1424] w-full max-w-lg rounded-2xl border border-white/10 shadow-2xl p-8 animate-modal-content overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-[#00d4ff]/5 blur-[60px] pointer-events-none" />
         
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-black text-[#eef2ff] tracking-tight">{isEdit ? 'Edit Bounty' : 'Post New Bounty'}</h2>
-          <button onClick={onClose} className="text-[#6b7a99] hover:text-[#eef2ff] transition-colors p-1">
-            <X size={20} />
-          </button>
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-black font-display text-[#eef2ff] tracking-tight">Post New Bounty</h2>
+          <button onClick={onClose} className="text-[#6b7a99] hover:text-white transition-colors"><X size={24}/></button>
         </div>
         
-        {/* Posting As Identity */}
-        <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#a855f7] to-[#00d4ff] flex items-center justify-center text-lg font-black text-white shrink-0 shadow-[0_0_15px_rgba(0,212,255,0.3)]">
-            {address ? address.slice(2, 3).toUpperCase() : <User size={20} />}
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-[0.2em] leading-none mb-1">{isEdit ? 'Managing As' : 'Posting As'}</span>
-            <span className="text-sm text-[#eef2ff] font-mono font-bold">
-              {address ? truncateAddress(address) : 'Guest (Connect Wallet)'}
-            </span>
-            {!isConnected && (
-              <span className="text-[10px] text-[#ef4444] font-bold mt-1">Connection recommended</span>
-            )}
-          </div>
-        </div>
-        
-        <form onSubmit={handleSubmit} className="space-y-5 relative">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Bounty Title</label>
+            <label className="block text-[10px] font-mono font-bold text-[#6b7a99] uppercase tracking-[0.2em] mb-2">Bounty Title</label>
             <input
               required
-              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors"
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#eef2ff] outline-none focus:border-[#00d4ff]/50 transition-all font-body"
               placeholder="e.g. Audit smart contract"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={e => setFormData({ ...formData, title: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Description</label>
+            <label className="block text-[10px] font-mono font-bold text-[#6b7a99] uppercase tracking-[0.2em] mb-2">Description</label>
             <textarea
               required
               rows={3}
-              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors resize-none"
-              placeholder="What is this bounty about?"
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#eef2ff] outline-none focus:border-[#00d4ff]/50 transition-all resize-none font-body"
+              placeholder="What needs to be done?"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={e => setFormData({ ...formData, description: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Requirements</label>
+            <label className="block text-[10px] font-mono font-bold text-[#6b7a99] uppercase tracking-[0.2em] mb-2">Requirements</label>
             <textarea
               required
-              rows={3}
-              className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl px-4 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors resize-none"
-              placeholder="List criteria for the AI judge..."
+              rows={5}
+              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm text-[#eef2ff] outline-none focus:border-[#00d4ff]/50 transition-all resize-none font-body"
+              placeholder="1. Must do X&#10;2. Must do Y..."
               value={formData.requirements}
-              onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
+              onChange={e => setFormData({ ...formData, requirements: e.target.value })}
             />
+            <p className="mt-2 text-[10px] text-[#6b7a99] flex items-center gap-1.5 font-body">
+              <Brain size={12} className="text-[#00d4ff]" /> More specific requirements = better AI evaluation
+            </p>
           </div>
 
           <div>
-            <label className="block text-[11px] font-bold text-[#6b7a99] uppercase tracking-widest mb-2">Reward (ETH)</label>
+            <label className="block text-[10px] font-mono font-bold text-[#6b7a99] uppercase tracking-[0.2em] mb-2 text-right">Reward (ETH)</label>
             <div className="relative">
               <input
                 required
                 type="number"
-                step="0.0001"
-                min="0.0001"
-                className="w-full bg-[#050810] border border-[rgba(59,130,246,0.15)] rounded-xl pl-4 pr-12 py-3 text-[#eef2ff] text-sm focus:outline-none focus:border-[#00d4ff] transition-colors font-mono"
-                placeholder="e.g. 0.001"
+                step="0.001"
+                min="0.001"
+                className="w-full bg-black/40 border border-white/10 rounded-xl pl-10 pr-4 py-3 text-sm text-[#eef2ff] outline-none focus:border-[#00d4ff]/50 transition-all font-mono"
+                placeholder="0.01"
                 value={formData.reward}
-                onChange={(e) => setFormData({ ...formData, reward: e.target.value })}
+                onChange={e => setFormData({ ...formData, reward: e.target.value })}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[#6b7a99] font-bold text-[10px]">ETH</span>
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-[#00d4ff] font-bold"><DollarSign size={16}/></span>
             </div>
           </div>
 
@@ -149,21 +103,16 @@ export function BountyModal({ isOpen, onClose, onPost, initialData }: BountyModa
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-6 py-3 border border-[rgba(255,255,255,0.1)] text-[#94a3b8] font-bold text-sm rounded-xl hover:bg-white/5 transition-colors"
+              className="flex-1 px-6 py-3 border border-white/10 text-[#6b7a99] font-bold text-sm rounded-xl hover:bg-white/5 transition-all"
             >
               Cancel
             </button>
             <button
               type="submit"
-              disabled={loading || !isConnected}
-              className="flex-1 px-6 py-3 bg-[#3b82f6] hover:bg-[#00d4ff] text-white font-bold text-sm rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/10"
+              disabled={loading}
+              className="flex-1 px-6 py-3 bg-[#3b82f6] hover:bg-[#00d4ff] text-white font-bold text-sm rounded-xl transition-all shadow-lg shadow-blue-500/10 active:scale-95 disabled:opacity-50"
             >
-              {loading ? (
-                <div className="flex items-center justify-center gap-2">
-                  <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>{isEdit ? 'Updating...' : 'Posting...'}</span>
-                </div>
-              ) : (isEdit ? 'Update Bounty' : 'Post Bounty')}
+              {loading ? 'Posting...' : 'Post Bounty'}
             </button>
           </div>
         </form>

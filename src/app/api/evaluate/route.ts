@@ -1,50 +1,62 @@
 import { NextResponse } from 'next/server';
-import { evaluateSubmission } from '@/ai/flows/evaluate-submission-flow';
-import { EvaluationRequest } from '@/app/types/evaluation';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { buildJudgePrompt, parseJudgeResponse } from '@/app/lib/judge-prompt';
+import { EvaluationRequest } from '@/app/types';
 
 /**
- * Gemini 1.5 Flash free tier = 15 requests/minute, 1M tokens/day.
- * For a hackathon demo this is more than enough.
- * For production: add request queuing or upgrade to paid tier.
+ * @fileOverview AI Judge Endpoint.
+ * Securely calls Gemini 1.5 Flash using server-side API key.
  */
 
 export async function POST(req: Request) {
   try {
     const body: EvaluationRequest = await req.json();
 
-    // Validation before AI call
+    // 1. Validation
     if (!body.bountyTitle || !body.bountyRequirements || !body.submission) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
     if (body.submission.trim().length < 20) {
-      return NextResponse.json({ error: 'Submission too short to evaluate' }, { status: 400 });
+      return NextResponse.json({ error: 'Submission too short. Minimum 20 characters.' }, { status: 400 });
     }
 
-    // Performance tracking
-    const startTime = performance.now();
-    
+    // 2. Configuration
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return NextResponse.json({ error: 'AI Judge not configured. Check environment variables.' }, { status: 500 });
+    }
+
+    const genAI = new GoogleGenerativeAI(apiKey);
     // gemini-1.5-flash = fastest free model, ideal for structured output
-    const result = await evaluateSubmission({
-      bountyTitle: body.bountyTitle,
-      bountyDescription: body.bountyDescription,
-      bountyRequirements: body.bountyRequirements,
-      submission: body.submission,
+    const model = genAI.getGenerativeModel({ 
+      model: 'gemini-1.5-flash',
+      generationConfig: {
+        temperature: 0.1, // Low temperature = more deterministic, consistent verdicts
+        maxOutputTokens: 1024,
+      }
     });
 
-    const endTime = performance.now();
+    const startTime = Date.now();
+    const prompt = buildJudgePrompt(body);
+
+    // 3. AI Generation
+    const result = await model.generateContent(prompt);
+    const rawText = result.response.text();
+    const endTime = Date.now();
+
+    // 4. Parsing
+    const evaluation = parseJudgeResponse(rawText);
 
     return NextResponse.json({
-      ...result,
+      ...evaluation,
       evaluatedAt: new Date().toISOString(),
+      evaluationMs: endTime - startTime,
       model: 'gemini-1.5-flash',
-      evaluationMs: Math.round(endTime - startTime),
     });
+
   } catch (error: any) {
-    console.error('AI Evaluation Error:', error);
-    return NextResponse.json(
-      { error: error.message || 'AI evaluation service unavailable. Please retry.' },
-      { status: 500 }
-    );
+    console.error('AI API Error:', error);
+    return NextResponse.json({ error: 'AI evaluation service unavailable. Please retry.' }, { status: 500 });
   }
 }

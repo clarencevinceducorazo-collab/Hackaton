@@ -1,25 +1,39 @@
 import type { Metadata } from 'next';
+import { Syne, DM_Sans, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
 
+const syne = Syne({ 
+  subsets: ['latin'], 
+  weight: ['400', '700', '800'],
+  variable: '--font-syne' 
+});
+
+const dmSans = DM_Sans({ 
+  subsets: ['latin'], 
+  weight: ['400', '500', '700'],
+  variable: '--font-dm-sans' 
+});
+
+const jetbrains = JetBrains_Mono({ 
+  subsets: ['latin'], 
+  weight: ['400', '600', '700'],
+  variable: '--font-mono' 
+});
+
 export const metadata: Metadata = {
-  title: 'Bounty.AI — Autonomous Onchain Bounties',
-  description: 'An autonomous bounty platform where AI evaluates submissions and Base blockchain handles instant USDC payouts.',
+  title: 'AI Onchain Bounty Board',
+  description: 'Autonomous bounty platform where AI evaluates and Base pays.',
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html lang="en" className="scroll-smooth" suppressHydrationWarning>
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased bg-[#050810] text-[#eef2ff]" suppressHydrationWarning>
+      <body className={`${syne.variable} ${dmSans.variable} ${jetbrains.variable} font-body antialiased bg-[#04070f] text-[#eef2ff]`} suppressHydrationWarning>
         <Providers>
           {children}
         </Providers>
