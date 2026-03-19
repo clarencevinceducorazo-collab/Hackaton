@@ -1,16 +1,29 @@
 'use client';
+
 import React, { useState } from 'react';
 import { useBounties } from '../hooks/useBounties';
 import { BountyCard } from '../components/BountyCard';
 import { BountyModal } from '../components/BountyModal';
 import { FilterBar } from '../components/FilterBar';
 import { Toast } from '../components/Toast';
+import { WalletButton } from '../components/WalletButton';
+import { NetworkBadge } from '../components/NetworkBadge';
+import { PayoutButton } from '../components/PayoutButton';
+import { TransactionHistory } from '../components/TransactionHistory';
+import { TxEntry } from '../types/transaction';
+import { useAccount } from 'wagmi';
 
 export default function DashboardPage() {
-  const { bounties, addBounty, isLoaded } = useBounties();
+  const { address } = useAccount();
+  const { bounties, addBounty, updateBountyStatus, isLoaded } = useBounties();
   const [activeFilter, setActiveFilter] = useState('ALL');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [transactions, setTransactions] = useState<TxEntry[]>([]);
+  
+  // Track submission state for the demo
+  const [submittingBountyId, setSubmittingBountyId] = useState<string | null>(null);
+  const [aiVerdict, setAiVerdict] = useState<{ status: 'APPROVED' | 'REJECTED'; reason: string } | null>(null);
 
   const filteredBounties = bounties.filter(b => 
     activeFilter === 'ALL' || b.status === activeFilter
@@ -32,8 +45,32 @@ export default function DashboardPage() {
   };
 
   const handleSubmitWork = (bounty: any) => {
-    console.log('Submission for:', bounty.title);
+    setSubmittingBountyId(bounty.id);
     setToast({ message: 'Submission received! AI judge is reviewing...', type: 'info' });
+    
+    // Simulate AI Judge evaluation delay
+    setTimeout(() => {
+      setAiVerdict({
+        status: 'APPROVED',
+        reason: 'Submission explicitly addresses all three requirements. Layer 2 scaling is mentioned and explained. EVM compatibility is confirmed.'
+      });
+      updateBountyStatus(bounty.id, 'IN_REVIEW');
+    }, 2000);
+  };
+
+  const handlePayoutComplete = (txHash: string, bounty: any) => {
+    updateBountyStatus(bounty.id, 'PAID');
+    setTransactions(prev => [{
+      txHash,
+      amount: bounty.reward,
+      recipient: address || '0x...',
+      timestamp: new Date().toISOString(),
+      bountyTitle: bounty.title,
+      status: 'confirmed'
+    }, ...prev]);
+    setToast({ message: 'Payout confirmed! TX: ' + txHash.slice(0, 10), type: 'success' });
+    setSubmittingBountyId(null);
+    setAiVerdict(null);
   };
 
   if (!isLoaded) return null;
@@ -47,15 +84,12 @@ export default function DashboardPage() {
           <span className="font-extrabold tracking-tighter text-lg">AI Bounty Board</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-4 bg-[rgba(16,185,129,0.08)] border border-[rgba(16,185,129,0.25)] px-3 py-1.5 rounded-full">
-          <div className="w-2 h-2 bg-[#10b981] rounded-full animate-pulse" />
-          <span className="text-[#10b981] text-[10px] font-mono font-bold tracking-widest uppercase">⚡ Base Sepolia Testnet</span>
+        <div className="hidden md:block">
+          <NetworkBadge />
         </div>
 
         <div className="flex items-center gap-3">
-          <button className="hidden sm:block px-5 py-2 border border-[rgba(255,255,255,0.1)] rounded-lg text-xs font-bold hover:bg-white/5 transition-colors">
-            Connect Wallet
-          </button>
+          <WalletButton />
           <button 
             onClick={() => setIsModalOpen(true)}
             className="bg-[#00d4ff] text-[#050810] px-5 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all active:scale-95"
@@ -82,6 +116,39 @@ export default function DashboardPage() {
             <span className="text-3xl font-black text-[#00d4ff] font-mono">${totalUSDC} USDC</span>
           </div>
         </div>
+
+        {/* AI REVIEW OVERLAY (FOR DEMO) */}
+        {submittingBountyId && aiVerdict && (
+          <div className="mb-12 p-8 bg-[#10b981]/5 border border-[#10b981]/30 rounded-2xl animate-fade-in">
+            <div className="flex flex-col md:flex-row gap-8 items-center">
+              <div className="flex-1">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 bg-[#10b981] rounded-full flex items-center justify-center text-xl">🤖</div>
+                  <div>
+                    <h3 className="text-lg font-black text-[#10b981]">AI VERDICT: {aiVerdict.status}</h3>
+                    <p className="text-xs text-[#6b7a99] font-mono">Confidence: 94%</p>
+                  </div>
+                </div>
+                <p className="text-[#c7d2fe] text-sm leading-relaxed italic">"{aiVerdict.reason}"</p>
+              </div>
+              <div className="w-full md:w-80">
+                {address ? (
+                  <PayoutButton 
+                    recipientAddress={address}
+                    rewardAmount={bounties.find(b => b.id === submittingBountyId)?.reward || 0}
+                    bountyId={submittingBountyId}
+                    onPayoutComplete={(hash) => handlePayoutComplete(hash, bounties.find(b => b.id === submittingBountyId))}
+                  />
+                ) : (
+                  <div className="text-center p-4 border border-dashed border-[#6b7a99] rounded-xl">
+                    <p className="text-xs text-[#6b7a99] mb-3">Connect wallet to claim reward</p>
+                    <WalletButton />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* FILTERS */}
         <FilterBar 
@@ -112,6 +179,9 @@ export default function DashboardPage() {
             </button>
           </div>
         )}
+
+        {/* TRANSACTION HISTORY */}
+        <TransactionHistory transactions={transactions} />
       </main>
 
       {/* MODAL & TOAST */}
