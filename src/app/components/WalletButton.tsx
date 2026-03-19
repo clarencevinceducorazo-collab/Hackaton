@@ -95,7 +95,7 @@ export function WalletButton() {
           <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowModal(false)} />
           <div className="relative bg-[#0d1424] w-full max-w-sm rounded-2xl border border-[rgba(59,130,246,0.2)] p-8 modal-enter flex flex-col max-h-[90vh] overflow-hidden">
             <h2 className="text-xl font-black text-[#eef2ff] mb-2 tracking-tight">Connect Wallet</h2>
-            <p className="text-sm text-[#6b7a99] mb-6">Choose Sepolia testnet wallet</p>
+            <p className="text-sm text-[#6b7a99] mb-6">Choose Sepolia testnet wallet.</p>
             
             <div className="flex flex-col gap-3 overflow-y-auto pr-2 custom-scrollbar">
               {connectors.map((connector) => (
