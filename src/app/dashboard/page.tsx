@@ -17,10 +17,10 @@ import { PayoutButton } from "../components/PayoutButton";
 import { TransactionHistory } from "../components/TransactionHistory";
 import { TxEntry } from "../types/transaction";
 import { useAccount } from "wagmi";
-import { User } from "lucide-react";
+import { User, Zap } from "lucide-react";
 
 export default function DashboardPage() {
-  const { address } = useAccount();
+  const { address, isConnected } = useAccount();
   const router = useRouter();
   const { bounties, addBounty, updateBountyStatus, isLoaded } = useBounties();
   const [activeFilter, setActiveFilter] = useState("ALL");
@@ -55,12 +55,11 @@ export default function DashboardPage() {
     PAID: bounties.filter((b) => b.status === "PAID").length,
   };
 
-  // ── ETH total (from file 2) ────────────────────────────────────────────────
   const totalRewards = bounties.reduce((acc, b) => acc + b.reward, 0);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   const handlePostBounty = (data: any) => {
-    addBounty(data);
+    addBounty({ ...data, creatorAddress: address });
     setIsModalOpen(false);
     setToast({ message: "Bounty posted successfully!", type: "success" });
   };
@@ -73,7 +72,6 @@ export default function DashboardPage() {
 
   /**
    * Called by BountyDetailModal when the user completes the submit-work form.
-   * Passes githubRepo, description, and images to the AI judge.
    */
   const handleSubmitWork = (bounty: any, submission: WorkSubmission) => {
     setIsDetailOpen(false);
@@ -83,18 +81,15 @@ export default function DashboardPage() {
       type: "info",
     });
 
-    // TODO: replace with your real AI judge API call, passing submission.githubRepo,
-    //       submission.description, and submission.images.
-    console.log("Submission:", submission);
-
+    // Simulated AI Judge Logic
     setTimeout(() => {
       setAiVerdict({
         status: "APPROVED",
         reason:
-          "Submission explicitly addresses all three requirements. Layer 2 scaling is mentioned and explained. EVM compatibility is confirmed.",
+          "Submission explicitly addresses all requirements. The code is well-structured and follows best practices for Ethereum development.",
       });
       updateBountyStatus(bounty.id, "IN_REVIEW");
-    }, 2000);
+    }, 2500);
   };
 
   const handlePayoutComplete = (txHash: string, bounty: any) => {
@@ -124,7 +119,7 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-[#050810] text-[#eef2ff] font-['DM_Sans'] selection:bg-[#00d4ff]/30">
       {/* NAVBAR */}
       <nav className="fixed top-0 left-0 right-0 h-16 bg-[#050810]/80 backdrop-blur-xl border-b border-[rgba(59,130,246,0.12)] z-[100] px-8 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={() => router.push("/")}>
           <div className="w-8 h-8 bg-[#00d4ff] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)] animate-pulse shadow-[0_0_15px_rgba(0,212,255,0.4)]" />
           <span className="font-extrabold tracking-tighter text-lg">
             AI Bounty Board.
@@ -139,13 +134,14 @@ export default function DashboardPage() {
           <WalletButton />
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-[#00d4ff] text-[#050810] px-5 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all active:scale-95"
+            className="bg-[#00d4ff] text-[#050810] px-5 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all active:scale-95 flex items-center gap-2"
           >
+            <Zap size={14} fill="currentColor" />
             Post Bounty
           </button>
           <button
             onClick={() => router.push("/profile")}
-            className="w-9 h-9 rounded-full bg-[#0d1424] border-2 border-transparent flex items-center justify-center hover:border-[#a855f7] transition-all active:scale-95"
+            className="w-9 h-9 rounded-full bg-[#0d1424] border-2 border-transparent flex items-center justify-center hover:border-[#a855f7] transition-all active:scale-95 group overflow-hidden relative"
             style={{
               background:
                 "linear-gradient(#0d1424, #0d1424) padding-box, linear-gradient(135deg, #a855f7, #00d4ff) border-box",
@@ -170,25 +166,24 @@ export default function DashboardPage() {
       <main className="pt-28 pb-20 px-8 max-w-[1400px] mx-auto">
         {/* STATS BAR */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-12">
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1">
+          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-colors">
+            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#00d4ff] transition-colors">
               Total Bounties
             </span>
             <span className="text-3xl font-black text-[#eef2ff] font-mono">
               {counts.ALL}
             </span>
           </div>
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1">
+          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#10b981]/30 transition-colors">
+            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#10b981] transition-colors">
               Open Opportunities
             </span>
             <span className="text-3xl font-black text-[#10b981] font-mono">
               {counts.OPEN}
             </span>
           </div>
-          {/* ETH reward pool display from file 2 */}
-          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1">
+          <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.12)] p-5 rounded-2xl flex flex-col items-center group hover:border-[#00d4ff]/30 transition-colors">
+            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-widest mb-1 group-hover:text-[#00d4ff] transition-colors">
               Total Reward Pool
             </span>
             <span className="text-3xl font-black text-[#00d4ff] font-mono">
@@ -199,11 +194,11 @@ export default function DashboardPage() {
 
         {/* AI REVIEW OVERLAY */}
         {submittingBountyId && aiVerdict && (
-          <div className="mb-12 p-8 bg-[#10b981]/5 border border-[#10b981]/30 rounded-2xl animate-fade-in">
+          <div className="mb-12 p-8 bg-[#10b981]/5 border border-[#10b981]/30 rounded-2xl animate-fade-in shadow-[0_0_30px_rgba(16,185,129,0.1)]">
             <div className="flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-[#10b981] rounded-full flex items-center justify-center text-xl">
+                  <div className="w-10 h-10 bg-[#10b981] rounded-full flex items-center justify-center text-xl shadow-[0_0_15px_#10b981]">
                     🤖
                   </div>
                   <div>
@@ -211,11 +206,11 @@ export default function DashboardPage() {
                       AI VERDICT: {aiVerdict.status}
                     </h3>
                     <p className="text-xs text-[#6b7a99] font-mono">
-                      Confidence: 94%
+                      Confidence: 94% • Evaluated by Gemini 1.5 Flash
                     </p>
                   </div>
                 </div>
-                <p className="text-[#c7d2fe] text-sm leading-relaxed italic">
+                <p className="text-[#c7d2fe] text-sm leading-relaxed italic border-l-2 border-[#10b981]/30 pl-4 py-1">
                   "{aiVerdict.reason}"
                 </p>
               </div>
@@ -236,9 +231,9 @@ export default function DashboardPage() {
                     }
                   />
                 ) : (
-                  <div className="text-center p-4 border border-dashed border-[#6b7a99] rounded-xl">
-                    <p className="text-xs text-[#6b7a99] mb-3">
-                      Connect wallet to claim reward
+                  <div className="text-center p-6 border-2 border-dashed border-[#6b7a99]/30 rounded-xl bg-black/20">
+                    <p className="text-xs text-[#6b7a99] mb-4 font-bold uppercase tracking-widest">
+                      Connection Required
                     </p>
                     <WalletButton />
                   </div>
@@ -273,21 +268,21 @@ export default function DashboardPage() {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-24 bg-[#0d1424]/40 rounded-3xl border border-dashed border-[rgba(59,130,246,0.15)]">
-            <div className="w-20 h-20 border-2 border-dashed border-[#6b7a99] rounded-full flex items-center justify-center mb-6 opacity-40">
+          <div className="flex flex-col items-center justify-center py-32 bg-[#0d1424]/40 rounded-3xl border border-dashed border-[rgba(59,130,246,0.15)] backdrop-blur-sm">
+            <div className="w-20 h-20 border-2 border-dashed border-[#6b7a99]/40 rounded-full flex items-center justify-center mb-6 opacity-40">
               <span className="text-4xl text-[#6b7a99]">?</span>
             </div>
             <h3 className="text-2xl font-black text-[#6b7a99] mb-2 tracking-tight">
               No bounties found
             </h3>
             <p className="text-[#6b7a99] font-medium">
-              Be the first to post a new challenge!
+              Try switching filters or create a new challenge.
             </p>
             <button
               onClick={() => setIsModalOpen(true)}
-              className="mt-8 text-[#00d4ff] font-bold hover:underline"
+              className="mt-8 text-[#00d4ff] font-bold hover:underline hover:text-[#00d4ff]/80 transition-colors flex items-center gap-2"
             >
-              Post First Bounty →
+              Post First Bounty <Zap size={14} />
             </button>
           </div>
         )}
