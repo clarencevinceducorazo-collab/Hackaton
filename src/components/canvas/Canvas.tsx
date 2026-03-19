@@ -21,7 +21,7 @@ export function Canvas() {
       // Default initial card
       setCards([{
         id: "initial-1",
-        title: "Welcome to SparkCanvas",
+        title: "Hackaton Project",
         content: "Use the plus button to add ideas, or type a theme below to let AI kickstart your brainstorming session!",
         x: 100,
         y: 100
