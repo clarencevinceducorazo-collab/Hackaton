@@ -79,7 +79,7 @@ export function Canvas() {
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg transform rotate-6 hover:rotate-0 transition-transform cursor-pointer">
             <span className="text-white font-black text-xl">S</span>
           </div>
-          <h1 className="text-2xl font-black text-slate-800 tracking-tight">Hack<span className="text-primary">aton</span></h1>
+          <h1 className="text-2xl font-black text-slate-800 tracking-tight">Hack<span className="text-primary">aton.</span></h1>
         </div>
         
         <div className="flex items-center gap-4 pointer-events-auto">
