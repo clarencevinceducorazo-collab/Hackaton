@@ -81,7 +81,7 @@ export default function DashboardPage() {
       <nav className="fixed top-0 left-0 right-0 h-16 bg-[#050810]/80 backdrop-blur-xl border-b border-[rgba(59,130,246,0.12)] z-[100] px-8 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-8 h-8 bg-[#00d4ff] [clip-path:polygon(50%_0%,100%_25%,100%_75%,50%_100%,0%_75%,0%_25%)] animate-pulse shadow-[0_0_15px_rgba(0,212,255,0.4)]" />
-          <span className="font-extrabold tracking-tighter text-lg">AI Bounty Board</span>
+          <span className="font-extrabold tracking-tighter text-lg">AI Bounty Board.</span>
         </div>
         
         <div className="hidden md:block">
