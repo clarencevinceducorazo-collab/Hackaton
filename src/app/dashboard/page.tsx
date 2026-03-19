@@ -7,7 +7,6 @@ import { BountyCard } from "../components/BountyCard";
 import { BountyModal } from "../components/BountyModal";
 import {
   BountyDetailModal,
-  WorkSubmission,
 } from "../../components/dashboard/BountyDetailModal";
 import { FilterBar } from "../components/FilterBar";
 import { Toast } from "../components/Toast";
@@ -17,18 +16,20 @@ import { TransactionHistory } from "../components/TransactionHistory";
 import { TxEntry } from "../types/transaction";
 import { useAccount } from "wagmi";
 import { User, Zap, Trophy, ShieldCheck } from "lucide-react";
+import { Bounty } from "../types/bounty";
 
 export default function DashboardPage() {
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const router = useRouter();
-  const { bounties, addBounty, updateBountyStatus, isLoaded } = useBounties();
+  const { bounties, addBounty, updateBounty, updateBountyStatus, deleteBounty, isLoaded } = useBounties();
   const [activeFilter, setActiveFilter] = useState("ALL");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingBounty, setEditingBounty] = useState<Bounty | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error" | "info";
   } | null>(null);
-  const [transactions, setTransactions] = useState<TxEntry[]>([]);
+  const [transactions] = useState<TxEntry[]>([]);
 
   // ── Detail modal state ─────────────────────────────────────────────────────
   const [selectedBounty, setSelectedBounty] = useState<any | null>(null);
@@ -48,10 +49,21 @@ export default function DashboardPage() {
   const totalRewards = bounties.reduce((acc, b) => acc + b.reward, 0);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const handlePostBounty = (data: any) => {
-    addBounty({ ...data, creatorAddress: address });
+  const handlePostOrUpdateBounty = (data: any) => {
+    if (editingBounty) {
+      updateBounty(editingBounty.id, { ...data });
+      setToast({ message: "Bounty updated successfully!", type: "success" });
+    } else {
+      addBounty({ ...data, creatorAddress: address });
+      setToast({ message: "Bounty posted successfully!", type: "success" });
+    }
     setIsModalOpen(false);
-    setToast({ message: "Bounty posted successfully!", type: "success" });
+    setEditingBounty(null);
+  };
+
+  const handleEditBounty = (bounty: Bounty) => {
+    setEditingBounty(bounty);
+    setIsModalOpen(true);
   };
 
   const handleCardClick = (bounty: any) => {
@@ -60,7 +72,6 @@ export default function DashboardPage() {
   };
 
   const handleApproved = useCallback((bountyId: string) => {
-    // In Feature 4.4 we wire real ETH payouts. For now, update local status.
     updateBountyStatus(bountyId, 'PAID');
     setIsDetailOpen(false);
     setSelectedBounty(null);
@@ -90,7 +101,10 @@ export default function DashboardPage() {
         <div className="flex items-center gap-3">
           <WalletButton />
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setEditingBounty(null);
+              setIsModalOpen(true);
+            }}
             className="bg-[#00d4ff] text-[#050810] px-5 py-2 rounded-lg text-xs font-bold hover:shadow-[0_0_20px_rgba(0,212,255,0.4)] transition-all active:scale-95 flex items-center gap-2"
           >
             <Zap size={14} fill="currentColor" />
@@ -146,7 +160,12 @@ export default function DashboardPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredBounties.map((b) => (
               <div key={b.id} onClick={() => handleCardClick(b)} className="cursor-pointer group">
-                <BountyCard bounty={b} onSubmit={() => handleCardClick(b)} />
+                <BountyCard 
+                  bounty={b} 
+                  onSubmit={() => handleCardClick(b)} 
+                  onEdit={handleEditBounty}
+                  onDelete={deleteBounty}
+                />
               </div>
             ))}
           </div>
@@ -164,7 +183,15 @@ export default function DashboardPage() {
       </main>
 
       {/* MODALS */}
-      <BountyModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onPost={handlePostBounty} />
+      <BountyModal 
+        isOpen={isModalOpen} 
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingBounty(null);
+        }} 
+        onPost={handlePostOrUpdateBounty} 
+        initialData={editingBounty}
+      />
 
       <BountyDetailModal
         bounty={selectedBounty}

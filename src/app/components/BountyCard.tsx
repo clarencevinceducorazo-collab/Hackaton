@@ -1,14 +1,20 @@
 'use client';
 import React from 'react';
 import { Bounty } from '../types/bounty';
-import { User } from 'lucide-react';
+import { User, Pencil, Trash2 } from 'lucide-react';
+import { useAccount } from 'wagmi';
 
 interface BountyCardProps {
   bounty: Bounty;
   onSubmit: (bounty: Bounty) => void;
+  onEdit?: (bounty: Bounty) => void;
+  onDelete?: (id: string) => void;
 }
 
-export function BountyCard({ bounty, onSubmit }: BountyCardProps) {
+export function BountyCard({ bounty, onSubmit, onEdit, onDelete }: BountyCardProps) {
+  const { address } = useAccount();
+  const isOwner = address && bounty.creatorAddress && address.toLowerCase() === bounty.creatorAddress.toLowerCase();
+
   const statusStyles = {
     OPEN: 'bg-[rgba(16,185,129,0.1)] border-[#10b981] text-[#10b981]',
     IN_REVIEW: 'bg-[rgba(245,158,11,0.1)] border-[#f59e0b] text-[#f59e0b]',
@@ -23,12 +29,40 @@ export function BountyCard({ bounty, onSubmit }: BountyCardProps) {
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   return (
-    <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.15)] rounded-xl p-6 transition-all duration-300 hover:border-[rgba(0,212,255,0.35)] hover:-translate-y-1 group flex flex-col h-full">
+    <div className="bg-[#0d1424] border border-[rgba(59,130,246,0.15)] rounded-xl p-6 transition-all duration-300 hover:border-[rgba(0,212,255,0.35)] hover:-translate-y-1 group flex flex-col h-full relative">
       <div className="flex justify-between items-start mb-4">
         <span className={`text-[10px] font-bold px-2 py-1 rounded border uppercase tracking-widest ${statusStyles[bounty.status]}`}>
           {bounty.status === 'PAID' ? 'Completed ✓' : bounty.status.replace('_', ' ')}
         </span>
-        <span className="text-[#6b7a99] text-[11px] font-mono">{date}</span>
+        <div className="flex items-center gap-3">
+          {isOwner && bounty.status === 'OPEN' && (
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit?.(bounty);
+                }}
+                className="p-1.5 rounded-lg hover:bg-white/5 text-[#6b7a99] hover:text-[#00d4ff] transition-colors"
+                title="Edit Bounty"
+              >
+                <Pencil size={14} />
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (confirm('Are you sure you want to delete this bounty?')) {
+                    onDelete?.(bounty.id);
+                  }
+                }}
+                className="p-1.5 rounded-lg hover:bg-white/5 text-[#6b7a99] hover:text-[#ef4444] transition-colors"
+                title="Delete Bounty"
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          )}
+          <span className="text-[#6b7a99] text-[11px] font-mono">{date}</span>
+        </div>
       </div>
 
       <h3 className="text-xl font-extrabold text-[#eef2ff] mb-2 leading-tight group-hover:text-[#00d4ff] transition-colors">

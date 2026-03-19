@@ -70,15 +70,19 @@ export function useBounties() {
     setBounties((prev) => [newBounty, ...prev]);
   };
 
-  const updateBountyStatus = (id: string, status: Bounty['status']) => {
+  const updateBounty = (id: string, updates: Partial<Bounty>) => {
     setBounties((prev) =>
-      prev.map((b) => (b.id === id ? { ...b, status } : b))
+      prev.map((b) => (b.id === id ? { ...b, ...updates } : b))
     );
+  };
+
+  const updateBountyStatus = (id: string, status: Bounty['status']) => {
+    updateBounty(id, { status });
   };
 
   const deleteBounty = (id: string) => {
     setBounties((prev) => prev.filter((b) => b.id !== id));
   };
 
-  return { bounties, addBounty, updateBountyStatus, deleteBounty, isLoaded };
+  return { bounties, addBounty, updateBounty, updateBountyStatus, deleteBounty, isLoaded };
 }

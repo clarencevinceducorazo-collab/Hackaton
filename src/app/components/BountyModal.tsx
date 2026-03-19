@@ -1,15 +1,17 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
-import { User } from 'lucide-react';
+import { User, X } from 'lucide-react';
+import { Bounty } from '../types/bounty';
 
 interface BountyModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPost: (bounty: any) => void;
+  initialData?: Bounty | null;
 }
 
-export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
+export function BountyModal({ isOpen, onClose, onPost, initialData }: BountyModalProps) {
   const { address, isConnected } = useAccount();
   const [formData, setFormData] = useState({
     title: '',
@@ -19,8 +21,22 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
   });
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    if (initialData) {
+      setFormData({
+        title: initialData.title,
+        description: initialData.description,
+        requirements: initialData.requirements,
+        reward: initialData.reward.toString(),
+      });
+    } else {
+      setFormData({ title: '', description: '', requirements: '', reward: '' });
+    }
+  }, [initialData, isOpen]);
+
   if (!isOpen) return null;
 
+  const isEdit = !!initialData;
   const truncateAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -28,17 +44,18 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
     if (!formData.title || !formData.description || !formData.requirements || !formData.reward) return;
     
     setLoading(true);
-    // Simulate short on-chain prep
-    await new Promise(r => setTimeout(r, 800));
+    // Simulate prep
+    await new Promise(r => setTimeout(r, 600));
     
     onPost({
       ...formData,
+      id: initialData?.id,
       reward: parseFloat(formData.reward),
-      status: 'OPEN',
+      status: initialData?.status || 'OPEN',
     });
     
     setLoading(false);
-    setFormData({ title: '', description: '', requirements: '', reward: '' });
+    onClose();
   };
 
   return (
@@ -52,7 +69,12 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
         {/* Background Glow */}
         <div className="absolute -top-24 -right-24 w-48 h-48 bg-[#3b82f6]/10 blur-[60px] rounded-full pointer-events-none" />
         
-        <h2 className="text-2xl font-black text-[#eef2ff] mb-6 tracking-tight relative">Post New Bounty</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-black text-[#eef2ff] tracking-tight">{isEdit ? 'Edit Bounty' : 'Post New Bounty'}</h2>
+          <button onClick={onClose} className="text-[#6b7a99] hover:text-[#eef2ff] transition-colors p-1">
+            <X size={20} />
+          </button>
+        </div>
         
         {/* Posting As Identity */}
         <div className="mb-8 p-4 rounded-xl bg-white/5 border border-white/5 flex items-center gap-4">
@@ -60,12 +82,12 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
             {address ? address.slice(2, 3).toUpperCase() : <User size={20} />}
           </div>
           <div className="flex flex-col">
-            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-[0.2em] leading-none mb-1">Posting As</span>
+            <span className="text-[10px] text-[#6b7a99] font-bold uppercase tracking-[0.2em] leading-none mb-1">{isEdit ? 'Managing As' : 'Posting As'}</span>
             <span className="text-sm text-[#eef2ff] font-mono font-bold">
               {address ? truncateAddress(address) : 'Guest (Connect Wallet)'}
             </span>
             {!isConnected && (
-              <span className="text-[10px] text-[#ef4444] font-bold mt-1">Connection recommended for payouts</span>
+              <span className="text-[10px] text-[#ef4444] font-bold mt-1">Connection recommended</span>
             )}
           </div>
         </div>
@@ -139,9 +161,9 @@ export function BountyModal({ isOpen, onClose, onPost }: BountyModalProps) {
               {loading ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  <span>Posting...</span>
+                  <span>{isEdit ? 'Updating...' : 'Posting...'}</span>
                 </div>
-              ) : 'Post Bounty'}
+              ) : (isEdit ? 'Update Bounty' : 'Post Bounty')}
             </button>
           </div>
         </form>
