@@ -11,7 +11,7 @@ interface Bounty {
   reward: number;
   status: 'OPEN' | 'IN_REVIEW' | 'PAID';
   tags?: string[];
-  postedBy?: string; // This was from an older spec, we use creatorAddress now
+  postedBy?: string; 
   creatorAddress?: string;
   deadline?: string;
   requirements?: string | string[];
